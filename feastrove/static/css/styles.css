@@ -1,0 +1,44 @@
+.navbar {
+    background-color: #F17228;
+}
+.btn-outline-success {
+    color: #F17228;
+    font-weight: 500;
+    border-color: #FFB30E;
+    background-color: white;
+}
+
+.btn-outline-success:hover {
+    background-color: #FFB30E;
+    color: white;
+    border-color: #FFB30E;
+}
+
+/* Custom focus style for Bootstrap form-control */
+.form-control:focus, .form-select:focus {
+    border-color: #FFB30E; /* Changing the border color on focus */
+    box-shadow: 0 0 0 0.2rem rgba(255, 179, 14, 0.75); 
+}
+
+
+.carousel{
+    display: flex;
+    height: 470px;
+
+}
+.carousel-image{
+    background-image: url("/static/images/banner-images/bg-image1.jpg");
+    background-size: cover;
+    background-position: center;
+    width: 100%;
+}
+
+.carousel-section{
+    padding-left: 5%;
+    max-width: 100%;
+    padding-bottom: 3%;
+}
+
+.my-search {
+    background-color: #F17228;
+}
