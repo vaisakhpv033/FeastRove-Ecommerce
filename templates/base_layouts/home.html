@@ -1,5 +1,13 @@
-{% extends 'layouts/base.html' %}
+{% extends 'base_layouts/base.html' %}
 {% load static %}
+
+{% block navbar %}
+<div>
+    <a href="#"><button class="btn btn-outline-success" type="submit">Login</button></a>
+    <a href="{% url 'registerUser' %}"><button class="btn btn-outline-success">Register</button></a>
+</div>
+{% endblock %}
+
 {% block body %}
 <!-- Carousel Section -->
 <section class="carousel d-flex justify-content-center">

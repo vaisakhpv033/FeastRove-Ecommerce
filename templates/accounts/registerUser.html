@@ -1,0 +1,91 @@
+{% extends 'base_layouts/base.html' %}
+{% load static %}
+
+{% block navbar %}
+<div>
+    <button class="btn btn-outline-success" type="submit">Login</button>
+    <button class="btn btn-outline-success">Register Restaurant</button>
+</div>
+{% endblock %}
+
+{% block body %}
+
+<main class="d-flex align-items-center mt-2">
+    <div class="container">
+        <div class="row d-flex justify-content-center align-items-center">
+            <div class="col-12 col-md-9 col-lg-7 col-xl-6">
+                <div class="card" style="border-radius:15px;">
+                    <div class="card-body p-5">
+
+                        <h2 class="text-uppercase text-center mb-5">Create an account</h2>
+
+                        <form action='' method='POST'>
+                            {% csrf_token %}
+                            <div class="row">
+                                <div class="col-12 col-md-6">
+                                    <div data-mdb-input-init class="form-ouline mb-3">
+                                        {{ form.username }}
+                                        <label class="form-label" for="username">Username</label>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <div data-mdb-input-init class="form-outline mb-3">
+                                        {{ form.email }}
+                                        <label class="form-label" for="email">Your Email</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-12 col-md-6">
+                                    <div data-mdb-input-init class="form-ouline mb-3">
+                                        {{ form.first_name }}
+                                        <label class="form-label" for="first_name">First Name</label>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <div data-mdb-input-init class="form-outline mb-3">
+                                        {{ form.last_name }}
+                                        <label class="form-label" for="last_name">Last Name</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div data-mdb-input-init class="form-ouline mb-3">
+                                {{ form.password }}
+                                <label class="form-label" for="password">Password</label>
+                            </div>
+
+                            <div data-mdb-input-init class="form-ouline mb-3">
+                                {{ form.confirm_password }}
+                                <label class="form-label" for="confirm_password">Confirm your password</label>
+                            </div>
+
+                            <div class="d-flex justify-content-center">
+                                <button type="submit" data-mdb-button-init
+                                    data-mdb-ripple-init class="btn btn-success btn-block btn-lg gradient-custom-4 text-body w-50">Register</button>
+                            </div>
+
+                            <p class="text-center text-muted mt-4 mb-0">Already have an account?
+                                <a href="" class="fw-bold text-body"><u>Login here</u></a>
+                            </p>
+                        </form>
+
+                        {% if form.errors %}
+                            <div class="alert alert-danger">
+                                <ul>
+                                    {% for field, errors in form.errors.items %}
+                                        {% for error in errors %}
+                                            <li>{{ error }}</li>
+                                        {% endfor %}
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}
