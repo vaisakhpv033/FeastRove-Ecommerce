@@ -2,39 +2,44 @@
 {% load static %}
 
 {% block navbar %}
-<div>
-    <a href="#"><button class="btn btn-outline-success" type="submit">Login</button></a>
-    <a href="{% url 'registerUser' %}"><button class="btn btn-outline-success">Register</button></a>
-</div>
+    <div>
+        {% if user.is_authenticated %}
+        <a href="{% url 'myAccount' %}"><button class="btn btn-outline-success" type="submit">My Account</button></a>
+        <a href="{% url 'logout' %}"><button class="btn btn-outline-success">Logout</button></a>
+        {% else %}
+        <a href="{% url 'login' %}"><button class="btn btn-outline-success" type="submit">Login</button></a>
+        <a href="{% url 'registerUser' %}"><button class="btn btn-outline-success">Register</button></a>
+        {% endif %}
+    </div>
 {% endblock %}
 
 {% block body %}
-<!-- Carousel Section -->
-<section class="carousel d-flex justify-content-center">
-    <div class="container-fluid carousel-image d-flex flex-column justify-content-center align-items-center">
-        <div class="carousel-section py-3">
-            <h3 class="carousel-title fs-1 fw-bold">Feeling Hungry?</h3>
-            <h4 class="fs-6 fw-normal">
-                Within few clicks, find delicious dishes waiting nearby
-            </h4>
-        </div>
-        <div class="my-search d-none d-md-flex justify-content-center p-3 w-75">
-            <div class="input-group">
-                <span class="input-group-text rounded-start"><img
-                        src="{% static 'images/svg-icons/location.svg' %}"></span>
-                <input type="text" class="form-control rounded-end" placeholder="Restaurant Name or Food Name">
-                <span class="input-group-text ms-3 rounded-start"><img
-                        src="{% static 'images/svg-icons/location.svg' %}"></span>
-                <input type="text" class="form-control rounded-end" placeholder="All locations">
-                <select class="form-select ms-3 rounded" id="inputGroupSelect01">
-                    <option selected>Choose radius...</option>
-                    <option value="1">10Km</option>
-                    <option value="2">20Km</option>
-                    <option value="3">30Km</option>
-                </select>
-                <button class="btn btn-outline-success ms-3 rounded" type="submit">Search</button>
+    <!-- Carousel Section -->
+    <section class="carousel d-flex justify-content-center">
+        <div class="container-fluid carousel-image d-flex flex-column justify-content-center align-items-center">
+            <div class="carousel-section py-3">
+                <h3 class="carousel-title fs-1 fw-bold">Feeling Hungry?</h3>
+                <h4 class="fs-6 fw-normal">
+                    Within few clicks, find delicious dishes waiting nearby
+                </h4>
+            </div>
+            <div class="my-search d-none d-md-flex justify-content-center p-3 w-75">
+                <div class="input-group">
+                    <span class="input-group-text rounded-start"><img
+                            src="{% static 'images/svg-icons/location.svg' %}"></span>
+                    <input type="text" class="form-control rounded-end" placeholder="Restaurant Name or Food Name">
+                    <span class="input-group-text ms-3 rounded-start"><img
+                            src="{% static 'images/svg-icons/location.svg' %}"></span>
+                    <input type="text" class="form-control rounded-end" placeholder="All locations">
+                    <select class="form-select ms-3 rounded" id="inputGroupSelect01">
+                        <option selected>Choose radius...</option>
+                        <option value="1">10Km</option>
+                        <option value="2">20Km</option>
+                        <option value="3">30Km</option>
+                    </select>
+                    <button class="btn btn-outline-success ms-3 rounded" type="submit">Search</button>
+                </div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
 {% endblock %}

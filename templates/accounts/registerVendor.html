@@ -4,20 +4,19 @@
 {% block navbar %}
     <div>
         <a href="{% url 'login' %}"><button class="btn btn-outline-success">Login</button></a>
-        <a href="{% url 'registerVendor' %}"><button class="btn btn-outline-success">Register Restaurant</button></a>
+        <a href="{% url 'registerUser' %}"><button class="btn btn-outline-success">Register</button></a>
     </div>
 {% endblock %}
 
 
-
-
 {% block body %}
+    <!-- Modal Section -->
     <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
         aria-labelledby="staticBackdropLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="staticBackdropLabel">Info</h1>
+                    <h1 class="modal-title fs-5" id="staticBackdropLabel">Success</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -31,6 +30,7 @@
     </div>
 
 
+    <!-- Main Section Vendor Registration Form -->
     <main class="d-flex align-items-center mt-2">
         <div class="container">
             <div class="row d-flex justify-content-center align-items-center">
@@ -40,19 +40,19 @@
 
                             <h2 class="text-uppercase text-center mb-5">Create an account</h2>
 
-                            <form action='{% url "registerUser" %}' method='POST'>
+                            <form action='{% url "registerVendor" %}' method='POST' enctype="multipart/form-data">
                                 {% csrf_token %}
                                 <div class="row">
                                     <div class="col-12 col-md-6">
                                         <div data-mdb-input-init class="form-ouline mb-3">
                                             {{ form.username }}
-                                            <label class="form-label" for="username">Username</label>
+                                            <label class="form-label fw-50" for="username">Username</label>
                                         </div>
                                     </div>
                                     <div class="col-12 col-md-6">
                                         <div data-mdb-input-init class="form-outline mb-3">
                                             {{ form.email }}
-                                            <label class="form-label" for="email">Your Email</label>
+                                            <label class="form-label" for="email">Email</label>
                                         </div>
                                     </div>
                                 </div>
@@ -68,6 +68,21 @@
                                         <div data-mdb-input-init class="form-outline mb-3">
                                             {{ form.last_name }}
                                             <label class="form-label" for="last_name">Last Name</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-12 col-md-6">
+                                        <div data-mdb-input-init class="form-ouline mb-3">
+                                            {{ vendor_form.vendor_name }}
+                                            <label class="form-label" for="first_name">Restaurant Name</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-md-6">
+                                        <div data-mdb-input-init class="form-outline mb-3">
+                                            {{ vendor_form.vendor_license }}
+                                            <label class="form-label" for="last_name">Restaurant License</label>
                                         </div>
                                     </div>
                                 </div>
@@ -103,6 +118,17 @@
                                 </ul>
                             </div>
                             {% endif %}
+                            {% if vendor_form.errors %}
+                            <div class="alert alert-danger">
+                                <ul>
+                                    {% for field, errors in vendor_form.errors.items %}
+                                    {% for error in errors %}
+                                    <li>{{ error }}</li>
+                                    {% endfor %}
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -110,7 +136,6 @@
         </div>
     </main>
 {% endblock %}
-
 
 {% block extra_js %}
     <script>

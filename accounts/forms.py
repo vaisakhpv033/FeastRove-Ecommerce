@@ -9,7 +9,7 @@ class UserForm(forms.ModelForm):
             attrs={
                 "class": "form-control form-control-lg",
                 "id": "first_name",
-                "placeholder": "Enter your first name",
+                "placeholder": "first name",
             }
         )
     )
@@ -19,7 +19,7 @@ class UserForm(forms.ModelForm):
             attrs={
                 "class": "form-control form-control-lg",
                 "id": "last_name",
-                "placeholder": "Enter your last name",
+                "placeholder": "last name",
             }
         )
     )
@@ -29,7 +29,7 @@ class UserForm(forms.ModelForm):
             attrs={
                 "class": "form-control form-control-lg",
                 "id": "username",
-                "placeholder": "Enter your username"
+                "placeholder": "username"
             }
         )
     )
@@ -39,7 +39,7 @@ class UserForm(forms.ModelForm):
             attrs={
                 "class": "form-control form-control-lg",
                 "id": "email",
-                "placeholder": "Enter your email"
+                "placeholder": "email"
             }
         )
     )

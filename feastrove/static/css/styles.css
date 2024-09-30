@@ -42,3 +42,8 @@
 .my-search {
     background-color: #F17228;
 }
+
+.form-control-lg::placeholder {
+    font-size: 1.2rem; /* Adjust this value as needed */
+    color: #888; /* Optional: Change placeholder color */
+}
