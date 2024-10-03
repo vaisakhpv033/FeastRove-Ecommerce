@@ -18,6 +18,7 @@ from vendor.forms import VendorForm
 
 from .forms import UserForm
 from .models import User, UserProfile
+from vendor.models import Vendor
 
 
 # Create your views here.
