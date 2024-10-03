@@ -51,11 +51,14 @@
 
 
     <!-- Main content here -->
+     
     {% block body %}
-
-    {% endblock %}
-
-
+    {% block content %}
+    {% endblock content %}
+    {% endblock body %}
+    {% block extra_body %}
+    {% endblock extra_body %}
+     
 
 
 

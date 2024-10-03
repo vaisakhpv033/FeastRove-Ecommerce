@@ -144,7 +144,7 @@ def login(request):
         else:
             messages.error(request, "Invalid login credentials")
             return redirect("login")
-    return render(request, "accounts/login.html")
+    return render(request, "account/login.html")
 
 
 @login_required(login_url="login")

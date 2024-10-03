@@ -1,0 +1,35 @@
+{% extends 'base_layouts/base.html' %}
+{% load static %}
+
+
+{% block body %}
+    <div class="container-md mt-3">
+        <h2 class="text-center text-capitalize fw-bold">Customers</h2>
+        <table class="table table-hover">
+            <thead>
+                
+                <tr>
+                    <th scope="col">Email</th>
+                    <th scope="col">First Name</th>
+                    <th scope="col">Last Name</th>
+                    <th scope="col">Username</th>
+                    <th scope="col">Is Admin</th>
+                    <th scope="col"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                    <tr>
+                        <th scope="row">{{ user.email }}</th>
+                        <td>{{ user.first_name }}</td>
+                        <td>{{ user.last_name }}</td>
+                        <td>{{ user.username }}</td>
+                        <td>{{ user.date_joined|date:"d-m-y" }}</td>
+                        <td><a href={% url 'adminCustomerDetails' user.id %}><span class="badge text-bg-primary rounded-pill">Details</span></a></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+{% endblock %}

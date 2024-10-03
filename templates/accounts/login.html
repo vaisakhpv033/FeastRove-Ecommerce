@@ -1,5 +1,5 @@
 {% extends 'base_layouts/base.html' %}
-
+{% load socialaccount %}
 {% block navbar %}
     <a href="{% url 'registerUser' %}">
         <button type="button" class="btn btn-outline-success">Register</button>
@@ -49,6 +49,9 @@
                     </p>
                     <p class="text-center text-muted mt-1 mb-0">
                         <a href="{% url 'forgotPassword' %}" class="fw-bold text-body"><u>Forgot Password</u></a>
+                    </p>
+                    <p class="text-center text-muted mt-1 mb-0">
+                        <a href="{% provider_login_url 'google' %}" class="fw-bold text-body"><u>Sign in with Google</u></a>
                     </p>
                 </form>
             </div>

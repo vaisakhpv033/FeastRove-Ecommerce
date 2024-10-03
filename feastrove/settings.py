@@ -40,9 +40,19 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+
+    'django.contrib.sites',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
+
     "accounts",
     "vendor",
+    "admin_dashboard",
 ]
+
+SITE_ID = 1
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -52,6 +62,8 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+
+    "allauth.account.middleware.AccountMiddleware",
 ]
 
 ROOT_URLCONF = "feastrove.urls"
@@ -152,5 +164,33 @@ EMAIL_PORT = config("EMAIL_PORT", cast=int)
 EMAIL_HOST_USER = config("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
 EMAIL_USE_TLS = True
-DEFAULT_FROM_EMAIL = "FeastRove Marketplace <feastrovedjango@gmail.com>"
-print(EMAIL_HOST_USER, EMAIL_HOST_PASSWORD)
+DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL")
+
+
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',  # Default Django auth backend
+    'allauth.account.auth_backends.AuthenticationBackend',  # Allauth backend
+)
+
+
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
+        'AUTH_PARAMS': {
+            'access_type': 'online',
+        },
+        'OAUTH_PKCE_ENABLED': True,
+    }
+}
+
+SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
+
+# Redirect URLs after login/logout
+LOGIN_REDIRECT_URL = 'myAccount'
+LOGOUT_REDIRECT_URL = 'myAccount'
+
+
+

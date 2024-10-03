@@ -1,0 +1,40 @@
+{% extends 'base_layouts/base.html' %}
+{% load static %}
+
+
+{% block body %}
+    <div class="container-md mt-3">
+        <h2 class="text-center text-capitalize fw-bold">Approve Vendors</h2>
+        <table class="table table-hover">
+            <thead>
+                
+                <tr>
+                    <th scope="col">Email</th>
+                    <th scope="col">Restaurant Name</th>
+                    <th scope="col">First Name</th>
+                    <th scope="col">Username</th>
+                    <th scope="col">Joined Date</th>
+                    <th scope="col"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if users %}
+                {% for vendor in users %}
+                    <tr>
+                        <th scope="row">{{ vendor.user.email }}</th>
+                        <td>{{ vendor.vendor_name }}</td>
+                        <td>{{ vendor.user.first_name }}</td>
+                        <td>{{ vendor.user.username }}</td>
+                        <td>{{ vendor.created_at|date:"d-m-y" }}</td>
+                        <td><a href={% url 'adminVendorDetails' vendor.vendor_slug %}><span class="badge text-bg-primary rounded-pill">Details</span></a></td>
+                        <td><a href=#><span class="badge text-bg-primary rounded-pill">Approve</span></a></td>
+                    </tr>
+                {% endfor %}
+                {% else %}
+                <h2 class="text-center">No Unapproved Vendors</h2>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+    
+{% endblock %}
