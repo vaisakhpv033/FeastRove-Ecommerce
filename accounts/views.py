@@ -25,32 +25,11 @@ from vendor.models import Vendor
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def register_user(request):
     if request.user.is_authenticated:
-        return redirect("myaccount")
+        return redirect("myAccount")
     elif request.method == "POST":
         form = UserForm(request.POST)
         if form.is_valid():
-            first_name = form.cleaned_data["first_name"]
-            last_name = form.cleaned_data["last_name"]
-            username = form.cleaned_data["username"]
-            email = form.cleaned_data["email"]
-            password = form.cleaned_data["password"]
-            user = User.objects.create_user(
-                first_name=first_name,
-                last_name=last_name,
-                username=username,
-                email=email,
-                password=password,
-            )
-            user.role = User.CUSTOMER
-            user.save()
-
-            # send verification email
-            mail_subject = "Activate your account"
-            email_template = "accounts/emails/account_verification_email.html"
-            send_verification_email(
-                request, user, email_subject=mail_subject, email_template=email_template
-            )
-
+            form.save(role=User.CUSTOMER)
             messages.success(
                 request, "A verification link has been sent to your email."
             )
@@ -64,37 +43,17 @@ def register_user(request):
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def register_vendor(request):
     if request.user.is_authenticated:
-        return redirect("myaccount")
+        return redirect("myAccount")
     elif request.method == "POST":
         form = UserForm(request.POST)
         vendor_form = VendorForm(request.POST, request.FILES)
         if form.is_valid() and vendor_form.is_valid():
-            first_name = form.cleaned_data["first_name"]
-            last_name = form.cleaned_data["last_name"]
-            username = form.cleaned_data["username"]
-            email = form.cleaned_data["email"]
-            password = form.cleaned_data["password"]
-            user = User.objects.create_user(
-                first_name=first_name,
-                last_name=last_name,
-                username=username,
-                email=email,
-                password=password,
-            )
-            user.role = User.VENDOR
-            user.save()
+            user = form.save(role=User.VENDOR)
             vendor = vendor_form.save(commit=False)
             vendor.user = user
             user_profile = UserProfile.objects.get(user=user)
             vendor.user_profile = user_profile
             vendor.save()
-
-            # send verification email
-            mail_subject = "Activate your account"
-            email_template = "accounts/emails/account_verification_email.html"
-            send_verification_email(
-                request, user, email_subject=mail_subject, email_template=email_template
-            )
 
             messages.success(
                 request, "A verification link has been sent to your email."
@@ -171,6 +130,7 @@ def customer_dashboard(request):
 
 @login_required(login_url="login")
 @user_passes_test(check_role_vendor)
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def vendor_dashboard(request):
     return render(request, "accounts/vendorDashboard.html")
 

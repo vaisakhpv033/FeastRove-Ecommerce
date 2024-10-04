@@ -2,9 +2,8 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.core.validators import RegexValidator
 from django.db import models
 
-
 class UserManager(BaseUserManager):
-    def create_user(self, first_name, last_name, username, email, password=None):
+    def create_user(self, first_name, last_name, username, email, password=None, role=None):
         if not email:
             raise ValueError("User must have an email address")
 
@@ -16,6 +15,7 @@ class UserManager(BaseUserManager):
             username=username,
             first_name=first_name,
             last_name=last_name,
+            role = role,
         )
 
         user.set_password(password)
@@ -35,6 +35,7 @@ class UserManager(BaseUserManager):
         user.is_active = True
         user.is_staff = True
         user.is_superadmin = True
+        user.role = None
         user.save(using=self.db)
         return user
 

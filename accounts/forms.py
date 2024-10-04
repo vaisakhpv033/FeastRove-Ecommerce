@@ -2,8 +2,8 @@ import re
 
 from django import forms
 
-
-from .models import User
+from .validators import validate_file_mimetype
+from .models import User, UserProfile
 
 
 class UserForm(forms.ModelForm):
@@ -113,3 +113,50 @@ class UserForm(forms.ModelForm):
             raise forms.ValidationError(
                 "The password must contain at least one special character (!@#$%^&*)."
             )
+        
+    def save(self, role, commit=True):
+        first_name = self.cleaned_data['first_name']
+        last_name = self.cleaned_data['last_name']
+        username = self.cleaned_data['username']
+        email = self.cleaned_data['email']
+        password = self.cleaned_data['password']
+        user = User.objects.create_user(
+            first_name = first_name,
+            last_name=last_name,
+            username=username,
+            email=email,
+            password=password,
+            role = role
+        )
+        return user
+        
+
+
+class UserProfileForm(forms.ModelForm):
+    profile_picture = forms.FileField(
+        widget=forms.FileInput(
+            attrs={
+                'class': 'btn btn-info w-75',
+            }
+        ), 
+        validators=[validate_file_mimetype],
+    )
+    cover_photho = forms.FileField(
+        widget=forms.FileInput(
+            attrs={
+                'class': 'btn btn-info w-75',
+            }
+        ), 
+        validators=[validate_file_mimetype],
+    )
+    class Meta:
+        model = UserProfile
+        fields = ["profile_picture", "cover_photho", "address", "state", "city", "pin_code", "latitude", "longitude" ]
+
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields:
+            if field == "latitude" or field == "longitude":
+                self.fields[field].widget.attrs['readonly'] = 'readonly'
+

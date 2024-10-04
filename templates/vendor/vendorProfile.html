@@ -30,73 +30,168 @@
 						<div class="col-lg-9 col-md-9 col-sm-12 col-xs-12">
 							<div class="user-dashboard loader-holder">
 								<div class="user-holder">
+
+									{% if profile_form.errors %}
+                            <div class="alert alert-danger">
+                                <ul>
+                                    {% for field, errors in profile_form.errors.items %}
+                                    {% for error in errors %}
+                                    <li>{{ error }}</li>
+                                    {% endfor %}
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            {% endif %}
+                            {% if vendor_form.errors %}
+                            <div class="alert alert-danger">
+                                <ul>
+                                    {% for field, errors in vendor_form.errors.items %}
+                                    {% for error in errors %}
+                                    <li>{{ error }}</li>
+                                    {% endfor %}
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            {% endif %}
 									
-									<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-										<div class="row">
-											<div class="element-title has-border right-filters-row">
-												<h5>Recent Orders</h5>
-												<div class="right-filters row pull-right">
-													<div class="col-lg-6 col-md-6 col-xs-6">
-														<div class="input-field">
-															<select class="chosen-select-no-single">
-																<option selected="selected" value="">Select Orders Status</option>
-																<option value="Processing">Processing</option>
-																<option value="Cancelled">Cancelled</option>
-																<option value="Completed">Completed</option>
-															</select>
+									
+                                    <h2>Manage Your Restaurant</h2>
+									<!-- My Restaurants Form Start -->
+									<form action="{% url 'vendorProfile' %}" method='POST' enctype="multipart/form-data">
+                                        {% csrf_token %}
+										<div class="form-fields-set">
+											<ul>
+												<li>
+													<div class="row">
+														<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+															<div class="restaurant-info mb-3">
+																<div class="img-holder mr-3">
+																	<ul class="foodbakery-gallery-holder">
+																		<li class="gal-img">
+																			<div class="drag-list">
+																				<div class="item-thumb">
+																					<img class="thumbnail" src="{% if profile.profile_picture %}{{ profile.profile_picture.url }} {% endif %}" alt="Logo">
+																				</div>
+																			</div>
+																		</li>
+																	</ul>
+																</div>
+																<div class="text-holder w-75">
+																	<label>Update Logo</label>
+																	<div class="upload-gallery">
+																		{{ profile_form.profile_picture }}
+																	</div>
+																</div>
+																<label class="text-danger">{{ profile_form.profile_picture.errors }}</label>
+															</div>
 														</div>
-													</div>
+														<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+															<div class="restaurant-info mb-3">
+																<div class="img-holder mr-3">
+																	<ul class="foodbakery-gallery-holder">
+																		<li class="gal-img">
+																			<div class="drag-list">
+																				<div class="item-thumb">
+																					<img class="thumbnail" src="{% if profile.cover_photho %}{{ profile.cover_photho.url }} {% endif %}" alt="cover photho">
+																				</div>
+																			</div>
+																		</li>
+																	</ul>
+																</div>
+																<div class="text-holder w-75">
+																	<label>Update Cover photho</label>
+																	<div class="upload-gallery">
+																		{{ profile_form.cover_photho}}
+																	</div>
+																</div>
+																<label class="text-danger">{{profile_form.cover_photho.errors }}</label>
+															</div>
+														</div>
+														<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+															<div class="restaurant-info mb-3">
+																<div class="img-holder mr-3">
+																	<ul class="foodbakery-gallery-holder">
+																		<li class="gal-img">
+																			<div class="drag-list">
+																				<div class="item-thumb">
+																					<a href="{% if vendor.vendor_license %}{{ vendor.vendor_license.url }} {% endif %}" ><img class="thumbnail" src="{% if vendor.vendor_license %}{{ vendor.vendor_license.url }} {% endif %}" alt=""></a>
+																				</div>
+																			</div>
+																		</li>
+																	</ul>
+																</div>
+																<div class="text-holder w-75">
+																	<label>Update License</label>
+																	<div class="upload-gallery">
+																		{{ vendor_form.vendor_license }}
+																	</div>
+																</div>
+																<label class="text-danger">{{ vendor_form.vendor_license.errors }}</label>
+															</div>
+														</div>
+														<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+															<div class="field-holder">
+																<label>Restaurant name *</label>
+																{{ vendor_form.vendor_name }}
+															</div>
+														</div>
+
+														<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+															<div class="field-holder">
+																<label>Address *</label>
+																{{ profile_form.address }}
+															</div>
+														</div>
+
+														<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 d-md-flex gap-2">
+															<div class="field-holder">
+																<label>country</label>
+																<input type="text" value="India" class="foodbakery-dev-req-field">
+															</div>
+															<div class="field-holder">
+																<label>State *</label>
+																{{ profile_form.state }}
+															</div>
+														</div>
+
+														<div class="col-lg-12 col-md-06 col-sm-12 col-xs-12 d-md-flex gap-2">
+															<div class="field-holder">
+																<label>City *</label>
+																{{ profile_form.city }}
+															</div>
+															<div class="field-holder">
+																<label>Pin code *</label>
+																{{ profile_form.pin_code }}
+															</div>
+														</div>
+
+														<div class="col-lg-06 col-md-06 col-sm-12 col-xs-12 d-md-flex gap-2">
+															<div class="field-holder">
+																<label>latitude *</label>
+																{{ profile_form.latitude }}
+															</div>
+															<div class="field-holder">
+																<label>longitude *</label>
+																{{ profile_form.longitude }}
+															</div>
 													
+
+
+														
+													</div>
+												</li>
+											</ul>
+											<div>
+												<div class="field-holder">
+													<div class="payment-holder input-button-loader">
+														<input  type="submit" value="Update Restaurant" >
+													</div>
 												</div>
 											</div>
 										</div>
-									</div>
-									<div class="row">
-										<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-											<div class="user-orders-list">
-												<div class="responsive-table">
-													<ul class="table-generic">
-														<li class="order-heading-titles">
-															<div>Order id</div>
-															<div>Date</div>
-															<div>Total Price</div>
-															<div>Charges</div>
-															<div>Received</div>
-															<div>Status</div>
-														</li>
-														<li class="order-heading-titles">
-															<div><a href="#" data-toggle="modal" data-target="#order-det-22606">order-22606</a></div>
-															<div>Apr 9,2020</div>
-															<div>£ 38.99</div>
-															<div>£ 3.90</div>
-															<div>£ 35.09</div>
-															<div><span class="order-status" style="background-color: #047a06;">Completed</span></div>
-														</li>
-														
-														
-														
-														<li class="order-heading-titles">
-															<div><a href="#" data-toggle="modal" data-target="#order-det-22606">order-22583</a></div>
-															<div>Apr 9,2020</div>
-															<div>£ 26.22</div>
-															<div>£ 2.62</div>
-															<div>£ 23.60</div>
-															<div><span class="order-status" style="background-color: #1e73be;">Processing</span></div>
-														</li>
-														<li class="order-heading-titles">
-															<div><a href="#" data-toggle="modal" data-target="#order-det-22606">order-22493</a></div>
-															<div>Apr 2,2020</div>
-															<div>£ 28.24</div>
-															<div>£ 2.82</div>
-															<div>£ 25.42</div>
-															<div><span class="order-status" style="background-color: #047a06;">Completed</span></div>
-														</li>
-													</ul>
+									</form>
+									<!-- My Restaurants Form End -->
 
-												</div>												
-											</div>
-										</div>
-									</div>
 									
 								</div>
 							</div>

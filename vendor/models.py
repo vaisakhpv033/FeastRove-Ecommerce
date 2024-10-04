@@ -1,35 +1,10 @@
-import magic
-from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.text import slugify
 
 from accounts.models import User, UserProfile
 from accounts.utils import send_notification
+from accounts.validators import validate_file_mimetype, validate_file_size
 
-
-def validate_file_mimetype(file):
-    try:
-        file_mime_type = magic.from_buffer(file.read(1024), mime=True)
-        file.seek(0)  
-    except magic.MagicException:
-        print("file can't read")
-        raise ValidationError("Error occurred while reading the file.")
-
-    accept = ["image/png", "image/jpeg", "application/pdf"]
-    if file_mime_type not in accept:
-        print("file type is not supported")
-        raise ValidationError(
-            "Unsupported file type. Allowed types are: PNG, JPEG, and PDF."
-        )
-
-
-def validate_file_size(file):
-    max_size_mb = 2 
-    max_size = max_size_mb * 1024 * 1024  # Convert MB to bytes
-
-    if file.size > max_size:
-        print("file size exceeded")
-        raise ValidationError(f"File size should not exceed {max_size_mb} MB.")
 
 
 def vendor_license_path(instance, filename):

@@ -47,3 +47,17 @@
     font-size: 1.2rem; /* Adjust this value as needed */
     color: #888; /* Optional: Change placeholder color */
 }
+
+
+.btn-success {
+    color: black;
+    font-weight: 500;
+    border-color: #F17228;
+    background-color: #FFB30E;
+}
+
+.btn-success:hover {
+    background-color: #F17228;
+    color: white;
+    border-color: #FFB30E;
+}
