@@ -18,11 +18,11 @@ def validate_file_mimetype(file):
         print("file can't read")
         raise ValidationError("Error occurred while reading the file.")
 
-    accept = ["image/png", "image/jpeg"]
+    accept = ["image/png", "image/jpeg", "image/jpg"]
     if file_mime_type not in accept:
         print("file type is not supported")
         raise ValidationError(
-            "Unsupported file type or corrupted file. Allowed types are: PNG, JPEG"
+            "Unsupported file type or corrupted file. Allowed types are: PNG, JPEG, JPG"
         )
 
 

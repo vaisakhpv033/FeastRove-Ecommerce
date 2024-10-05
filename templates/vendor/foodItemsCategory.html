@@ -1,0 +1,89 @@
+{% extends 'base_layouts/base.html' %}
+{% load static %}
+
+{% block extra_head %}
+{% include 'includes/extraStyles.html' %}
+{% endblock %}
+
+{% block navbar %}
+<a href="{% url 'logout' %}">
+    <button type="button" class="btn btn-outline-success">Logout</button>
+</a>
+{% endblock %}
+
+
+{% block body %}
+<!--  Modal section -->
+{% include 'includes/modal.html' %}
+
+{% include 'includes/vendorCover.html' %}
+<!-- Main Section Start -->
+<div class="album py-5 ">
+    <div class="container">
+        <h2 class="text-capitalize text-center"> {{ category }}</h2>
+        <div class="d-grid gap-2 d-md-flex justify-content-md-between">
+
+            <button class="btn btn-secondary btn-sm" type="button" onclick="history.back()"><svg xmlns="http://www.w3.org/2000/svg" width="16"
+                    height="16" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd"
+                        d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8" />
+                </svg>
+            </button></a>
+
+            <button class="btn btn-success btn-sm" type="button"><svg xmlns="http://www.w3.org/2000/svg" width="16"
+                    height="16" fill="currentColor" class="bi bi-plus-lg" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd"
+                        d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2" />
+                </svg> Add Food Item
+            </button>
+        </div>
+        <hr>
+
+        <div class="container-lg">
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
+                {% if food_items %}
+                {% for item in food_items %}
+                <div class="col">
+                    <div class="card shadow-sm">
+                        <img src="{{ item.image.url }}" class="card-img-top" alt="..." height="250px" width="200px">
+                        <div class="card-body">
+                            <h3 class="card-text">{{ item.food_title }}</h3>
+                            <h6 class="card-text"> {{ item.vendor.vendor_name }}</h6>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h6 class="text-body-secondary font-weight-bold">₹{{ item.price }}</h6>
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-sm btn-outline-success">Edit</button>
+                                    <button type="button" class="btn btn-sm btn-outline-success">Details</button>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <h4 class="text-center">No food Items Found</h4>
+                {% endif %}
+
+
+
+
+
+
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Main Section End -->
+
+{% endblock %}
+
+
+{% block extra_js %}
+
+{% include 'includes/extrajs.html' %}
+
+{% endblock %}

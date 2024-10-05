@@ -1,0 +1,88 @@
+{% extends 'base_layouts/base.html' %}
+{% load static %}
+
+{% block extra_head %}
+	{% include 'includes/extraStyles.html' %}
+{% endblock %}
+
+{% block navbar %}
+    <a href="{% url 'logout' %}">
+        <button type="button" class="btn btn-outline-success">Logout</button>
+    </a>
+{% endblock %}
+
+
+{% block body %}
+    <!--  Modal section -->
+    {% include 'includes/modal.html' %}
+
+    <!-- Main Section Start -->
+		<div class="main-section">
+			{% include 'includes/vendorCover.html' %}
+			<div class="page-section account-header buyer-logged-in">
+				<div class="container">
+					<div class="row">
+						<div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
+                            <!-- Load vendor sidebar here -->
+						{% include 'includes/vendorSidebar.html' %}
+
+						</div>
+						<div class="col-lg-9 col-md-9 col-sm-12 col-xs-12">
+							<div class="user-dashboard loader-holder">
+								<div class="user-holder">
+
+						
+									
+									
+                                    <h2>Manage Your Menu</h2>
+									<!-- My Restaurants Form Start -->
+									<table class="table table-hover table-borderless">
+            
+                                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                            <a href="{% url 'vendorAddCategory' %}"><button class="btn btn-success btn-sm me-md-2" type="button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
+                                                <path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2"/>
+                                              </svg> Add Category</button></a>
+                                            <button class="btn btn-success btn-sm" type="button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-lg" viewBox="0 0 16 16">
+                                                <path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2"/>
+                                              </svg> Add Food Item</button>
+                                        </div>
+                                        <hr>
+                                        <tbody>
+                                           
+                                            {% for cat in categories %}
+                                                <tr>
+                                                    <th scope="row">{{ forloop.counter }}</th>
+                                                    <td>
+                                                        <a href="{% url 'vendorFoodItemsCategory' cat.slug %}" class="text-decoration-none"><p class="font-weight-bold my-0 text-capitalize text-dark">{{ cat }}</p></a>
+                                                    </td>
+
+                                                    <td>
+                                                        <a href={% url 'vendorEditCategory' cat.slug %}><span class="badge text-bg-warning rounded-pill">Edit</span></a>
+                                                        <a href={% url 'adminVendorDetails' vendor.vendor_slug %}><span class="badge text-bg-danger rounded-pill">Delete</span></a>
+                                                    
+                                                    </td>
+                                                    
+                                                </tr>
+                                            {% endfor %}
+                                         
+                                        </tbody>
+                                    </table>
+
+									
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- Main Section End -->
+
+{% endblock %}
+
+
+{% block extra_js %}
+   
+{% include 'includes/extrajs.html' %}
+   
+{% endblock %}

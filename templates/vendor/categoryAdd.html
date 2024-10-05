@@ -1,0 +1,97 @@
+{% extends 'base_layouts/base.html' %}
+{% load static %}
+
+{% block extra_head %}
+	{% include 'includes/extraStyles.html' %}
+{% endblock %}
+
+{% block navbar %}
+    <a href="{% url 'logout' %}">
+        <button type="button" class="btn btn-outline-success">Logout</button>
+    </a>
+{% endblock %}
+
+
+{% block body %}
+    <!--  Modal section -->
+    {% include 'includes/modal.html' %}
+
+    <!-- Main Section Start -->
+		<div class="main-section">
+			{% include 'includes/vendorCover.html' %}
+			<div class="page-section account-header buyer-logged-in">
+				<div class="container">
+					<div class="row">
+						<div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
+                            <!-- Load vendor sidebar here -->
+						{% include 'includes/vendorSidebar.html' %}
+
+						</div>
+						<div class="col-lg-9 col-md-9 col-sm-12 col-xs-12">
+							<div class="user-dashboard loader-holder">
+								<div class="user-holder">
+
+						
+									
+									
+                                    <h2>Add a New Category</h2>
+                                
+                                <div class="my-2">
+                                    <button class="btn btn-secondary btn-sm" type="button" onclick="history.back()"><svg xmlns="http://www.w3.org/2000/svg" width="16"
+                                        height="16" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
+                                        <path fill-rule="evenodd"
+                                            d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8" />
+                                    </svg>
+                                </button></a>
+                            </div>
+                            
+									<!-- My Restaurants Form Start -->
+									<form action="{% url 'vendorAddCategory' %}" method="POST">
+                                        {% csrf_token %}
+                                        <div class="form-fields-set">
+                                            <div class="row">
+                                                <div class="col-lg-12 col-md-12 col-sm-12">
+                                                    <div class="field-holder">
+                                                        <label>Category Name *</label>
+                                                            {{ form.category_name }}
+                                                        <label class="text-danger">{{ form.category_name.errors }}</label>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-lg-12 col-md-12 col-sm-12">
+                                                    <div class="field-holder">
+                                                        <label>Parent Category *</label>
+                                                            {{ form.parent }}
+                                                        <label class="text-danger">{{ form.parent.errors }}</label>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-lg-12 col-md-12 col-sm-12">
+                                                    <div class="field-holder">
+                                                        <label>Description</label>
+                                                            {{ form.description }}
+                                                        <label class="text-danger">{{ form.description.errors }}</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button class="btn btn-success" type="submit">Create Category</button>
+                                    </form>
+									
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- Main Section End -->
+
+{% endblock %}
+
+
+{% block extra_js %}
+   
+{% include 'includes/extrajs.html' %}
+   
+{% endblock %}

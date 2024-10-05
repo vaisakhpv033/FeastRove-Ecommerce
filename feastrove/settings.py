@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     "accounts",
     "vendor",
     "admin_dashboard",
+    "menu",
 ]
 
 SITE_ID = 1
