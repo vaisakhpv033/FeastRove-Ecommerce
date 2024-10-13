@@ -28,4 +28,5 @@ urlpatterns = [
     path("accounts/", include("accounts.urls")),
     path('auth/', include('allauth.urls')),
     path("admin-dashboard/", include("admin_dashboard.urls")),
+    path("marketplace/", include("marketplace.urls")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

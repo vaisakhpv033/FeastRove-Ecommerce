@@ -50,14 +50,27 @@
 
 
 .btn-success {
-    color: black;
     font-weight: 500;
-    border-color: #F17228;
-    background-color: #FFB30E;
-}
-
-.btn-success:hover {
     background-color: #F17228;
     color: white;
     border-color: #FFB30E;
+}
+
+.btn-success:hover {
+    border-color: #F17228;
+    background-color: #FFB30E;
+    color: black;
+}
+
+
+.text-feastrove {
+    color:#FFB30E;
+}
+
+.text-feastrove-dark {
+    color:#F17228;
+}
+
+.text-feastrove-dark:hover{
+    color: #FFB30E;
 }

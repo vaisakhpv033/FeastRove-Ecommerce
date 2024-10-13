@@ -51,6 +51,8 @@ INSTALLED_APPS = [
     "vendor",
     "admin_dashboard",
     "menu",
+    "customers",
+    "marketplace",
 ]
 
 SITE_ID = 1
@@ -82,6 +84,8 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
 
                 "accounts.context_processors.get_vendor",
+                "marketplace.context_processors.get_cart_count",
+                "marketplace.context_processors.get_cart_total",
             ],
         },
     },

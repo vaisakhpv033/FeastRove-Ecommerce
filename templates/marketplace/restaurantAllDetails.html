@@ -1,0 +1,93 @@
+{% extends 'base_layouts/base.html' %}
+{% load static %}
+
+{% block extra_head %}
+{% include 'includes/extraStyles.html' %}
+{% endblock %}
+
+{% block navbar %}
+<div>
+  {% if user.is_superadmin %}
+  <a href="{% url 'myAccount' %}"><button class="btn btn-outline-success" type="submit">Admin Dashboard</button></a>
+  <a href="{% url 'logout' %}"><button class="btn btn-outline-success">Logout</button></a>
+  {% elif user.is_authenticated %}
+  <a href="{% url 'myAccount' %}"><button class="btn btn-outline-success" type="submit">My Account</button></a>
+  <a href="{% url 'logout' %}"><button class="btn btn-outline-success">Logout</button></a>
+  {% else %}
+  <a href="{% url 'login' %}"><button class="btn btn-outline-success" type="submit">Login</button></a>
+  <a href="{% url 'registerUser' %}"><button class="btn btn-outline-success">Register</button></a>
+  {% endif %}
+</div>
+{% endblock %}
+
+
+
+
+{% block body %}
+
+
+<!-- Main Section Start -->
+<div class="main-section">
+  {% include 'includes/vendorCover.html' %}
+
+</div>
+<div class="container-lg text-center">
+  <div class="row gap-2 d-flex align-items-start"> <!-- Align items at the top, so left column doesn't stretch -->
+    
+    <!-- Left Sidebar (Categories) -->
+    <div class="d-none d-md-block col-md-3 border px-0 mt-2">
+      <div class="vstack"> <!-- No h-100, so sidebar stays as tall as its content -->
+        <div class="border-bottom py-2 bg-light">
+          <a href="{% url 'restaurantDetails' vendor.vendor_slug %}" class="text-decoration-none {% if '/all-categories/' in request.path %} text-feastrove-dark {% else %} text-dark {% endif %} fw-medium text-capitalize my-0 py-0">All Categories</a>
+        </div>
+        {% for category in categories %}
+        <div class="border-bottom py-2 bg-light">
+          <a href="{% url 'restaurantCategoryDetails' category.vendor.vendor_slug category.slug %}" class="{% if category.slug in request.path %} text-feastrove-dark {% else %} text-dark {% endif %} text-decoration-none text-capitalize fw-medium">
+            {{ category.category_name }}
+          </a>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Right Content (Food Items) -->
+    <div class="col-12 col-md-9">
+      <div class="">
+        <div class="row"> <!-- Nested row for cards -->
+          {% if fooditems %}
+          {% for item in fooditems %}
+          <div class="col-10 col-sm-6 col-lg-4 col-xxl-3 p-2"> <!-- Make sure each card is in a column with padding -->
+            <div class="card h-100"> <!-- Ensure each card stretches vertically -->
+              <a href="{% url 'foodItemDetails' item.slug %}">
+              {% if item.is_available %}
+                <img src="{% if item.image %} {{ item.image.url }} {% endif %}" class="card-img-top" alt="..." height="280px">
+                <span class="badge bg-success position-absolute top-0 start-0 m-2">Available</span>
+              {% else %}
+                <img src="{% if item.image %} {{ item.image.url }} {% endif %}" class="card-img-top" alt="..." height="280px" style="filter: grayscale(100%);">
+                <span class="badge bg-danger position-absolute top-0 start-0 m-2">Not Available</span>
+              {% endif %}
+              </a>
+
+              <div class="card-body">
+                <h5 class="card-title text-start">{{ item.food_title }}</h5>
+                <p class="card-text fw-bold text-start">₹{{ item.price }}</p>
+              </div>
+              <button class="card-footer btn btn-success add_to_cart" data-id="{{ item.slug }}" data-url="{% url 'addToCart' item.slug %}">
+                Add to Cart
+              </button>
+            </div>
+          </div>
+          {% endfor %}
+          {% else %}
+          <h5 class="text-center text-capitalize">We're sorry, but no food items are available at this time.</h5>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+  <!-- Main Section End -->
+
+  {% endblock %}

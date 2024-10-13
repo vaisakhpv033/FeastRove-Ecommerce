@@ -61,6 +61,19 @@
                             {% endif %}
                         </li>
                     </ul>
+
+
+                    {% if not vendor.is_approved %}
+                    <form method="POST" action="{% url 'adminApproveVendor' vendor.vendor_slug %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success">Approve Vendor</button>
+                    </form>
+                    {% else %}
+                    <form method="POST" action="{% url 'adminDisapproveVendor' vendor.vendor_slug %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">Disapprove Vendor</button>
+                    </form>
+                    {% endif %}
             </div>
         </div>
     </div>

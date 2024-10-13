@@ -6,4 +6,6 @@ def get_vendor(request):
         vendor = Vendor.objects.get(user=request.user)
     except:
         vendor = None
-    return {'vendor': vendor,}
+    return {
+        "vendor": vendor,
+    }

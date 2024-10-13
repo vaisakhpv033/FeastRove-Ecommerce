@@ -35,7 +35,7 @@ def check_role_customer(user):
     else:
         raise PermissionDenied
 
-
+# to send verification email
 def send_verification_email(user, *, email_subject, email_template):
     from_email = settings.DEFAULT_FROM_EMAIL
     current_site = Site.objects.get_current()
@@ -53,6 +53,7 @@ def send_verification_email(user, *, email_subject, email_template):
     mail.send()
 
 
+# to send notification email regarding approval
 def send_notification(email_subject, email_template, context):
     from_email = settings.DEFAULT_FROM_EMAIL
     message = render_to_string(email_template, context)

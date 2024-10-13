@@ -6,7 +6,6 @@ from accounts.utils import send_notification
 from accounts.validators import validate_file_mimetype, validate_file_size
 
 
-
 def vendor_license_path(instance, filename):
     return f"vendor/license/{instance.vendor_name}/{filename}"
 
@@ -28,13 +27,13 @@ class Vendor(models.Model):
 
     def save(self, *args, **kwargs):
         if self.pk is not None:
-            #update
+            # update
             orig = Vendor.objects.get(pk=self.pk)
             if orig.is_approved != self.is_approved:
                 mail_template = "accounts/emails/admin_approval_email.html"
                 context = {
-                    'user': self.user,
-                    'is_approved': self.is_approved,
+                    "user": self.user,
+                    "is_approved": self.is_approved,
                 }
                 if self.is_approved:
                     # send notification email
@@ -43,7 +42,6 @@ class Vendor(models.Model):
                 else:
                     mail_subject = "We're Sorry! You are not eligible for publishing your food menu on our  marketplace"
                     send_notification(mail_subject, mail_template, context)
-
 
         if not self.vendor_slug:
             base_slug = slugify(self.vendor_name)
