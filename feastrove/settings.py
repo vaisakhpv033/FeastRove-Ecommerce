@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     "menu",
     "customers",
     "marketplace",
+    "orders",
 ]
 
 SITE_ID = 1

@@ -1,0 +1,141 @@
+{% extends 'base_layouts/base.html' %}
+{% load static %}
+
+{% block extra_head %}
+
+{% include 'includes/extraStyles.html' %}
+
+{% endblock %}
+
+
+{% block navbar %}
+<a href="{% url 'logout' %}">
+    <button type="button" class="btn btn-outline-success">Logout</button>
+</a>
+{% endblock %}
+
+{% block body %}
+
+
+
+
+<!-- Main Section Start -->
+<div class="main-section">
+
+    <!-- customer cover image -->
+    {% include 'includes/customerCover.html' %}
+
+    <div class="page-section account-header buyer-logged-in">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
+                    <!-- Load vendor sidebar here -->
+                    {% include 'includes/customerSidebar.html' %}
+
+                </div>
+
+                <div class="col-lg-9 col-md-9 col-sm-12 col-xs-12">
+                    <div class="user-dashboard loader-holder">
+                        <div class="user-holder">
+
+
+
+
+                            <h2>Manage Your Addresses</h2>
+                            <!-- My Restaurants Form Start -->
+                            <table class="table table-hover table-borderless">
+
+                                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                    <a href="{% url 'customerAddAddress' %}"><button
+                                            class="btn btn-success btn-sm me-md-2" type="button"><svg
+                                                xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
+                                                <path fill-rule="evenodd"
+                                                    d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2" />
+                                            </svg> Add Address</button></a>
+
+                                </div>
+                                <hr>
+                                <tbody>
+
+                                    {% for address in addresses %}
+                                    <div class="card mb-2" id="address-{{ address.id }}">
+                                        
+                                        <div class="card-body">
+                                          <h5 class="card-title">{{ address }}</h5>
+                                          <p class="card-text my-0">{{ address.address }},&nbsp{{ address.road_name }},&nbsp{% if address.landmark %}{{ address.landmark }}{% endif %}</p>
+                                          <p class="card-text my-0 text-capitalize"><span class="pe-2">ph: {{ address.phone_number }}</span> <span class="px-2">State: {{ address.state }}</span> <span class="px-2">City: {{ address.city }}</span></p>
+                                          <p class="card-text mb-1">Pincode: {{ address.pincode }}</p>
+                                          <div class="d-flex">
+                                          <a href="{% url 'customerEditAddress' address.id %}" class="btn btn-warning">Edit</a>
+
+                                        
+                                          <a  data-url="{% url 'customerDeleteAddress' address.id %}" data-id="{{ address.id }}"  href="" class="btn btn-danger ml-2 delete_address">Delete</a>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    {% endfor %}
+
+                                </tbody>
+                            </table>
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Main Section End -->
+
+
+
+{% endblock %}
+
+{% block extra_js %}
+
+<script>
+    $(document).ready(function(){
+        $('.delete_address').on('click', function(e){
+            e.preventDefault();
+
+            var url = $(this).attr('data-url'); 
+            var address_id = $(this).attr('data-id'); 
+            console.log(url, address_id)
+
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        type: 'GET',
+                        url: url,
+                        
+                        success: function(response){
+                            if(response.status === 'Success'){
+                                Swal.fire('Deleted!', response.message, 'success');
+                                $('#address-' + address_id).remove(); 
+                            } else {
+                                Swal.fire('Error!', response.message, 'error');
+                            }
+                        },
+                        error: function(xhr, status, error){
+                            Swal.fire('Error!', 'Something went wrong!', 'error');
+                        }
+                    });
+                }
+            });
+        });
+    });
+</script>
+
+
+
+{% endblock %}

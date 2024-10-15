@@ -4,8 +4,9 @@
         <ul>
             <li class="{% if '/accounts/customer/Dashboard/' == request.path or '/accounts/customer/' == request.path %} active {% endif %}"><a href="{% url 'customer' %}"><i class="icon-dashboard3"></i>Dashboard</a></li>
             <li class="{% if 'profile/' in request.path %} active {% endif %}"><a href="{% url 'customerProfile' %}"><i class="icon-build"></i>Profile</a></li>
-            <li><a href="#"><i class="icon-add_shopping_cart"></i>Settings</a></li>
-            <li><a href="#"><i class="icon-unlock-alt"></i>Orders</a></li>
+            <li class="{% if 'addresses/' in request.path %} active {% endif %}"><a href="{% url 'customerAddresses' %}"><i class="icon-profile"></i>Addresses</a></li>
+            <li class="{% if 'reset-password/' in request.path %} active {% endif %}"><a href="{% url 'customerResetPassword' %}"><i class="icon-unlock-alt"></i>Reset Password</a></li>
+            <li><a href="#"><i class="icon-add_shopping_cart"></i>Orders</a></li>
             <li><a class="logout-btn" href="{% url 'logout' %}"><i class="icon-log-out"></i>Signout</a></li>
         </ul>
     </div>

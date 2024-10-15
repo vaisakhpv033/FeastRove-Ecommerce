@@ -150,7 +150,7 @@ def forgot_password(request):
             mail_subject = "Reset Your Password"
             email_template = "accounts/emails/reset_password_email.html"
             send_verification_email(
-                request, user, email_subject=mail_subject, email_template=email_template
+                 user, email_subject=mail_subject, email_template=email_template
             )
 
             messages.success(request, "Password reset link has been sent to your email address")
