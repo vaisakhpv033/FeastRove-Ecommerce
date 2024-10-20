@@ -21,22 +21,24 @@
 
 <!-- Main Section Start -->
 <div class="main-section">
-
+    {% if 'checkout/' not in request.path %}
     <!-- customer cover image -->
     {% include 'includes/customerCover.html' %}
+    {% endif %}
 
-    <div class="page-section account-header buyer-logged-in">
+    <div class="page-section account-header buyer-logged-in pt-0">
         <div class="container">
             <div class="row">
+                {% if 'checkout/' not in request.path %}
                 <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
                     <!-- Load vendor sidebar here -->
                     {% include 'includes/customerSidebar.html' %}
 
                 </div>
+                {% endif %}
 
-
-                <div class="col-lg-9 col-md-9 col-sm-12 col-xs-12">
-                    <div class="user-dashboard loader-holder">
+                <div class="{% if 'checkout/' in request.path %} col-12 {% else %}col-lg-9 col-md-9 col-sm-12 col-xs-12{% endif %}">
+                    <div class="user-dashboard loader-holder border-0">
                         <div class="user-holder">
 
 
@@ -55,7 +57,7 @@
                             </div>
 
                             <!-- My Restaurants Form Start -->
-                            <form action="{% url 'customerAddAddress' %}" method="POST">
+                            <form action="{% if 'checkout/' in request.path %}{% url 'checkoutAddAddress' %}{% else %}{% url 'customerAddAddress' %}{% endif %}" method="POST">
                                 {% csrf_token %}
                                 <div class="form-fields-set">
                                     <div class="row">

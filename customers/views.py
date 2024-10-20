@@ -85,6 +85,8 @@ def customer_add_address(request):
             address.user = request.user
             address.save()
             messages.success(request, "Address added successfully")
+            if 'checkout/' in request.path:
+                return redirect("checkout")
             return redirect("customerAddresses")
     context = {
         "form": form,

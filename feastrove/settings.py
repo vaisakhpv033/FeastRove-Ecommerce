@@ -85,6 +85,8 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
 
                 "accounts.context_processors.get_vendor",
+                "accounts.context_processors.get_paypal_client_id",
+
                 "marketplace.context_processors.get_cart_count",
                 "marketplace.context_processors.get_cart_total",
             ],
@@ -201,4 +203,16 @@ LOGIN_REDIRECT_URL = 'myAccount'
 LOGOUT_REDIRECT_URL = 'myAccount'
 
 
+# Paypal
+PAYPAL_CLIENT_ID = config("PAYPAL_CLIENT_ID")
 
+
+SECURE_CROSS_ORIGIN_OPENER_POLICY='same-origin-allow-popups'
+
+# Razorpay
+RZP_KEY_ID = config("RZP_KEY_ID")
+RZP_KEY_SECRET = config("RZP_KEY_SECRET")
+
+
+# Exchange Rate Api
+API_KEY = config("API_KEY")

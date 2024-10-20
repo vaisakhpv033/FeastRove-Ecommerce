@@ -1,5 +1,5 @@
 from vendor.models import Vendor
-
+from feastrove.settings import PAYPAL_CLIENT_ID
 
 def get_vendor(request):
     try:
@@ -9,3 +9,7 @@ def get_vendor(request):
     return {
         "vendor": vendor,
     }
+
+
+def get_paypal_client_id(request):
+    return {'PAYPAL_CLIENT_ID': PAYPAL_CLIENT_ID}

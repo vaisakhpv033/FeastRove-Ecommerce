@@ -1,6 +1,6 @@
 from django.urls import path
 from .import views
-
+from customers import views as Customerviews
 
 urlpatterns = [
     path('', views.marketplace, name="marketplace"),
@@ -15,6 +15,7 @@ urlpatterns = [
 
     path('cart/<int:cart_id>/remove-item', views.remove_cart_item, name="removeCartItem" ),
 
-
+    path('checkout/', views.checkout, name="checkout"),
+    path('checkout/addresses/add/', Customerviews.customer_add_address, name="checkoutAddAddress"),
     
 ]

@@ -1,0 +1,281 @@
+{% extends 'base_layouts/base.html' %}
+{% load static %}
+
+{% block body %}
+
+<!-- Add this to your HTML for the spinner -->
+<div id="spinner-overlay" class="d-none d-flex flex-column justify-content-center align-items-center">
+    <div class="spinner-border text-warning" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    <p class="mt-3">Do not refresh the page, your transaction is being processed...</p>
+</div>
+<div id="content-wrapper"></div>
+
+
+<section class="h-100 gradient-custom">
+    <div class="container py-5">
+        <div class="row d-flex justify-content-center my-4">
+            <div class="col-md-8 mb-2">
+                <div class="card">
+                    <div class="card-header py-3 bg-light text-dark d-flex justify-content-between">
+                        <h5 class="mb-0" id="cart_item_total_count">Review Details</h5>
+                    </div>
+                    <h6 class="text-start px-2 mt-2 mb-0">Delivery Address</h6>
+                    <div class="card mb-2 border-0">
+
+                        <div class="card-body pt-1">
+                            <p class="card-title fw-medium mb-1">{{ address.full_name }}</p>
+                            <p class="card-text my-0">{{ address.address }},&nbsp{{ address.road_name }},&nbsp{% if address.landmark %}{{ address.landmark }}{% endif %}</p>
+                            <p class="card-text my-0 text-capitalize"><span class="pe-2">ph: {{ address.phone_number}}</span> <span class="px-2">State: {{ address.state }}</span><spanclass="px-2">City: {{ address.city }}</span></p>
+                            <p class="card-text mb-1">Pincode: {{ address.pincode }}</p>
+                        </div>
+                    </div>
+                    <hr class="m-0">
+                    <h5 class="text-start px-2 mt-2">Ordering Foods</h5>
+                    <div class="row ms-1 p-2 col-12 flex-column justify-content-center align-items-center">
+
+                        
+                        {% for item in cart_items %}
+                        <div class="col pb-2">
+                            <div class="card rounded flex-row">
+
+                                
+                                <img src="{{ item.fooditem.image.url }}"
+                                        class="card-img-top" alt="..." height="125px" width="100px" style="max-width: 100px; padding:5px;">
+                                
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h6 class="card-text fw-medium">{{ item.fooditem.food_title }}</h6>
+                                        <h6 class="card-text fw-medium">₹{{ item.total_price }}</h6>
+                                    </div>
+                                    <p class="card-text m-0 mb-1"> {{ item.fooditem.vendor.vendor_name }}</p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h6 class="text-body-secondary font-weight-bold">Price: <strong>₹{{ item.fooditem.price }}</strong></h6>
+                                        <h6 class="text-body-secondary font-weight-medium">Quantity: {{ item.quantity }}</h6>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        
+
+                    </div>
+
+
+
+
+
+
+
+                </div>
+
+
+            </div>
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <div class="card-header py-3 bg-dark text-feastrove-dark">
+                        <h5 class="mb-0">Summary</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            <li
+                                class="list-group-item d-flex justify-content-between align-items-center border-0 px-0 pb-0">
+                                <span>Subtotal</span>
+                                <span id="subtotal">₹{{ subtotal }}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                <span>Tax</span>
+                                <span id="tax">₹{{ tax }}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
+                                <div>
+                                    <strong>Total amount</strong>
+                                    <strong>
+                                        <p class="mb-0">(including Tax)</p>
+                                    </strong>
+                                </div>
+                                <span class="fw-bold" id="grand_total">₹{{ grand_total }}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
+                                <div>
+                                    <strong>Total amount</strong>
+                                    <strong>
+                                        <p class="mb-0">(in usd)</p>
+                                    </strong>
+                                </div>
+                                <span class="fw-bold">${{ usd_amount }}</span>
+                            </li>
+                            <hr class="mt-0">
+
+
+                        </ul>
+
+                        {% if order.payment_method == 'paypal' %}
+                        <!-- Paypal button -->
+                            <div id="paypal-button-container"></div>
+                            <!-- Include the PayPal JavaScript SDK -->
+                            <script src="https://www.paypal.com/sdk/js?client-id={{ PAYPAL_CLIENT_ID }}&currency=USD"></script>
+                        {% elif order.payment_method == 'razorpay' %}
+                        <div id="razorpay-payment-button">
+                            <button class="btn btn-success" id="rzp-button1">Pay with Razorpay</button>
+                            <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+                        </div>
+                        {% endif %}
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+
+
+<script>
+
+    // using jQuery
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie != '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = jQuery.trim(cookies[i]);
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+
+    // Extract grand total from the server-side template
+    var grandTotal = "{{ usd_amount }}";
+    var url = "{% url 'payments' %}";
+    var order_number = "{{ order.order_number }}";
+    var csrftoken = getCookie('csrftoken');
+    var order_complete = "{% url 'orderComplete' %}";
+
+
+    {% if order.payment_method == 'paypal' %}
+    // Render the PayPal button into #paypal-button-container
+    paypal.Buttons({
+        createOrder: function (data, actions) {
+            // Create a PayPal order with the specified grand total
+            return actions.order.create({
+                purchase_units: [{
+                    amount: {
+                        value: grandTotal,
+                    },
+                }],
+            });
+        },
+        onApprove: function (data, actions) {
+            // Capture the PayPal order when the user approves the transaction
+            return actions.order.capture().then(function (orderData) {
+
+                $('#spinner-overlay').removeClass('d-none');
+                $('#content-wrapper').addClass('blur-background');
+                $('body').addClass('no-scroll');
+
+                // Log the order data to the console
+                console.log("Order Data:", orderData);
+
+                // Extract the transaction ID
+                var transactionId = orderData.purchase_units[0].payments.captures[0].id;
+                console.log("Transaction ID:", transactionId);
+
+                // Extract the status
+                var status = orderData.status
+                var payment_method = 'Paypal'
+
+                sendTransaction(transactionId, payment_method, status);
+
+                // Display a success message or perform additional actions
+                // Example: alert('Transaction completed by ' + orderData.payer.name.given_name);
+            });
+        }
+    }).render('#paypal-button-container');
+    {% endif %}
+
+    {% if order.payment_method == 'razorpay' %}
+    // Razorpay payment gateway 
+
+    var options = {
+        "key": "{{ RZP_KEY_ID }}", // Enter the Key ID generated from the Dashboard
+        "amount": "{{ amount }}", // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
+        "currency": "INR",
+        "name": "FeastRove",
+        "description": "Test Transaction",
+        "image": "https://example.com/your_logo",
+        "order_id": "{{ rzp_order_id }}", //This is a sample Order ID. Pass the `id` obtained in the response of Step 1
+        "handler": function (response){
+            // alert(response.razorpay_payment_id);
+            // alert(response.razorpay_order_id);
+            // alert(response.razorpay_signature)
+            $('#spinner-overlay').removeClass('d-none');
+            $('#content-wrapper').addClass('blur-background');
+            $('body').addClass('no-scroll');
+            var transaction_id = response.razorpay_payment_id;
+            var payment_method = 'Razorpay';            
+            var status = 'success';
+            sendTransaction(transaction_id, payment_method, status);
+        },
+        "prefill": {
+            "name": "{{ order.full_name }}",
+            "email": "{{ order.email }}",
+            "contact": "{{ order.phone_number }}"
+        },
+        "notes": {
+            "address": "{{ order.address }}"
+        },
+        "theme": {
+            "color": "#F17228"
+        }
+    };
+    var rzp1 = new Razorpay(options);
+    rzp1.on('payment.failed', function (response){
+            alert(response.error.code);
+            alert(response.error.description);
+            alert(response.error.source);
+            alert(response.error.step);
+            alert(response.error.reason);
+            alert(response.error.metadata.order_id);
+            alert(response.error.metadata.payment_id);
+    });
+    document.getElementById('rzp-button1').onclick = function(e){
+        rzp1.open();
+        e.preventDefault();
+    }
+    {% endif %}
+
+
+    // Send the data to payments view to store in the database
+    function sendTransaction(transactionId, payment_method, status) {
+        $.ajax({
+            type: 'POST',
+            url: url,
+            data: {
+                'order_number': order_number,
+                'transaction_id': transactionId,
+                'payment_method': payment_method,
+                'status': status,
+                'csrfmiddlewaretoken': csrftoken
+            },
+            success: function (response) {
+                console.log('response==>', response)
+                window.location.href= order_complete + '?order-no='+response.order_number+'&trans-id='+response.transaction_id
+            }
+        })
+    }
+</script>
+
+
+
+{% endblock %}

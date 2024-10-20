@@ -29,4 +29,8 @@ urlpatterns = [
     path('auth/', include('allauth.urls')),
     path("admin-dashboard/", include("admin_dashboard.urls")),
     path("marketplace/", include("marketplace.urls")),
+
+    # orders
+    path("orders/", include("orders.urls")),
+    
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

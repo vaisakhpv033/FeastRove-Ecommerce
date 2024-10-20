@@ -1,12 +1,12 @@
 from django.contrib.auth.decorators import login_required
 from django.db.models import F
 from django.http import JsonResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views.decorators.cache import cache_control
 
 from menu.models import Category, FoodItem
 from vendor.models import Vendor
-
+from customers.models import Address
 from .context_processors import get_cart_count, get_cart_total
 from .models import Cart
 
@@ -199,3 +199,17 @@ def remove_cart_item(request, cart_id):
             return JsonResponse({"status": "Failed", "message": "Invalid Request"})
     else:
         return JsonResponse({"status": "login_required", "message": "Login Required"})
+
+
+
+@login_required(login_url="login")
+@cache_control(no_cache=True, no_store=True, must_revalidate=True)
+def checkout(request):
+    addresses = Address.objects.filter(user=request.user)
+    cart_count = get_cart_count(request)['cart_count']
+    if cart_count <= 0:
+        return redirect("cart")
+    context = {
+        'addresses': addresses,
+    }
+    return render(request, "marketplace/checkout.html", context)

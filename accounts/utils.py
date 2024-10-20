@@ -54,11 +54,12 @@ def send_verification_email(user, *, email_subject, email_template):
 
 
 # to send notification email regarding approval
-def send_notification(email_subject, email_template, context):
+def send_notification(email_subject, email_template, context, to_email=None):
     from_email = settings.DEFAULT_FROM_EMAIL
     message = render_to_string(email_template, context)
-    to_email = context['user'].email
-    mail = EmailMessage(email_subject, message, from_email, to=[to_email])
+    if not to_email:
+        to_email = [context['user'].email]
+    mail = EmailMessage(email_subject, message, from_email, to=to_email)
     mail.send()
     
 

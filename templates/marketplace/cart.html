@@ -79,7 +79,7 @@
                             <div class="col-lg-4 col-md-6 mb-4 mb-lg-0">
                                 <!-- Price -->
                                 <p class="text-start text-md-center">
-                                    <strong id="item_total_price">₹{{ item.total_price }}</strong>
+                                    <strong id="item_total_price-{{ item.fooditem.slug }}">₹{{ item.total_price }}</strong>
                                 </p>
                                 <!-- Price -->
                             </div>
@@ -127,10 +127,10 @@
                             </li>
                         </ul>
 
-                        <button type="button" data-mdb-button-init data-mdb-ripple-init
+                        <a href="{% url 'checkout' %}"><button type="button" data-mdb-button-init data-mdb-ripple-init
                             class="btn btn-success btn-lg btn-block">
-                            Go to checkout
-                        </button>
+                            Proceed to checkout
+                        </button></a>
                     </div>
                 </div>
             </div>
@@ -182,7 +182,7 @@
                         $('#cart_counter').html(response.cart_counter['cart_count']);
                         $('#cart_item_total_count').html(`Cart - ${response.cart_counter['cart_count']} items`);
                         $('#qty-'+food_id).html(response.item_qty);
-                        $('#item_total_price').html('₹'+response.total_price);
+                        $('#item_total_price-'+food_id).html('₹'+response.total_price);
                         applyCartAmounts(
                             response.cart_amounts['subtotal'],
                             response.cart_amounts['tax'],
@@ -220,7 +220,7 @@
                         $('#cart_counter').html(response.cart_counter['cart_count']);
                         $('#cart_item_total_count').html(`Cart - ${response.cart_counter['cart_count']} items`);
                         $('#qty-'+food_id).html(response.item_qty);
-                        $('#item_total_price').html('₹'+response.total_price)
+                        $('#item_total_price-'+food_id).html('₹'+response.total_price)
                         removeCartItem(response.item_qty, cart_id);
                         checkEmptyCart();
                         applyCartAmounts(
