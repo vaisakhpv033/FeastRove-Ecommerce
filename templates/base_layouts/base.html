@@ -17,7 +17,15 @@
     <link href="{% static 'css/styles.css' %}" rel="stylesheet">
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> 
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    {% comment %} <script src="https://maps.googleapis.com/maps/api/js?key={{google_api_key}}&libraries=places&callback=initAutoComplete" async defer></script> {% endcomment %}
+
+    <script async
+    src="https://maps.googleapis.com/maps/api/js?key={{google_api_key}}&loading=async&libraries=places&callback=initAutoComplete">
+</script>
+
+    <script src="{% static 'javascript/custom.js' %}"></script>
 </head>
 
 <body class="overflow-x hidden bg-white">

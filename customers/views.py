@@ -2,6 +2,7 @@ from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.exceptions import ValidationError
+from django.db.utils import IntegrityError
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.cache import cache_control
@@ -9,12 +10,11 @@ from django.views.decorators.cache import cache_control
 from accounts.forms import UserProfileForm
 from accounts.models import UserProfile
 from accounts.utils import check_role_customer, validate_password
+from menu.models import FoodItem
 
 from .forms import AddressForm
-from .models import Address
+from .models import Address, Favourites
 
-
-# Create your views here.
 
 
 @login_required(login_url="login")
@@ -85,7 +85,7 @@ def customer_add_address(request):
             address.user = request.user
             address.save()
             messages.success(request, "Address added successfully")
-            if 'checkout/' in request.path:
+            if "checkout/" in request.path:
                 return redirect("checkout")
             return redirect("customerAddresses")
     context = {
@@ -115,11 +115,69 @@ def customer_edit_address(request, address_id):
 
 @login_required(login_url="login")
 def customer_delete_address(request, address_id):
-    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+    if request.headers.get("x-requested-with") == "XMLHttpRequest":
         try:
             address = get_object_or_404(Address, pk=address_id, user=request.user)
             address.delete()
-            return JsonResponse({'status': 'Success', 'message': 'Address deleted successfully'})
+            return JsonResponse(
+                {"status": "Success", "message": "Address deleted successfully"}
+            )
         except Address.DoesNotExist:
-            return JsonResponse({'status': 'Failed', 'message': 'Address does not exist'})
-    return JsonResponse({'status': 'Failed', 'message': 'Invalid request'})
+            return JsonResponse(
+                {"status": "Failed", "message": "Address does not exist"}
+            )
+    return JsonResponse({"status": "Failed", "message": "Invalid request"})
+
+
+def customer_favourites(request):
+    fav_items = Favourites.objects.filter(user=request.user).order_by("-created_at")
+    context = {
+        "fav_items": fav_items,
+    }
+    return render(request, "customer/favourites.html", context)
+
+
+@login_required(login_url="login")
+def customer_add_fav_item(request, food_item_slug):
+    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+        try:
+            food_item = FoodItem.objects.get(slug=food_item_slug)
+            if Favourites.objects.filter(
+                user=request.user, fooditem=food_item
+            ).exists():
+                return JsonResponse(
+                    {"status": "Failed", "message": "Already in favourites"}
+                )
+            fav_item = Favourites(user=request.user, fooditem=food_item)
+            fav_item.save()
+            return JsonResponse({"status": "Success", "message": "Added To Favourites"})
+        except FoodItem.DoesNotExist:
+            return JsonResponse(
+                {"status": "Failed", "message": "FoodItem Does Not exist"}
+            )
+        except IntegrityError:
+            return JsonResponse(
+                {
+                    "status": "Failed",
+                    "message": "Database error, Please try again after sometime",
+                }
+            )
+        except Exception:
+            return JsonResponse({"status": "Failed", "message": "something went Wrong"})
+    else:
+        return JsonResponse({"status": "Failed", "message": "Invalid Request"})
+
+
+@login_required(login_url="login")
+def customer_remove_fav_item(request, fav_item_id):
+    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+        try:
+            fav_item = Favourites.objects.get(pk=fav_item_id, user=request.user)
+            fav_item.delete()
+            return JsonResponse(
+                {"status": "Success", "message": "Removed from favourites"}
+            )
+        except Favourites.DoesNotExist:
+            return JsonResponse({"status": "Failed", "message": "Item Does not Exist"})
+    else:
+        return JsonResponse({"status": "Failed", "message": "Invalid Request"})

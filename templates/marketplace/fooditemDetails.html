@@ -67,8 +67,9 @@
             <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
           </svg></a>
         </div> {% endcomment %}
-        <div class="btn-group">
+        <div class="btn-group gap-2">
             <a href="#"><button type="button" class="btn btn-sm btn-outline-success add_to_cart" data-id="{{ food_item.slug }}" data-url="{% url 'addToCart' food_item.slug %}">Add To Cart</button></a>
+            <a href="#"><button type="button" class="btn btn-sm btn-outline-success add_to_favourites" data-id="{{ food_item.slug }}" data-url="{% url 'customerAddFavourite' food_item.slug %}">Add To Favourites</button></a>
         </div>
 
     </div>
@@ -84,7 +85,40 @@
 
 
 {% block extra_js %}
+<script>
+    // Add to Favourites
+    jQuery(document).ready(function(){
+        $('.add_to_favourites').on('click', function(e){
+            e.preventDefault();
+            let url = $(this).attr('data-url');
 
+            $.ajax({
+                type: 'GET',
+                url: url,
+                success: function(response){
+                    if (response.status === 'Success'){
+                        Swal.fire({
+                            title: response.message,
+                            icon: "success",
+                            showCancelButton: true,
+                            confirmButtonText: "Go to Favourites"
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location = '/accounts/customer/favourites';
+                            }
+                        })
+                    }
+                    else {
+                        Swal.fire({
+                            title: response.message,
+                            icon: "error",
+                        })
+                    }
+                }
+            })
+        })
+    })
+</script>
 
 
 

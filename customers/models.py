@@ -2,6 +2,7 @@ from django.core.validators import RegexValidator
 from django.db import models
 
 from accounts.models import User
+from menu.models import FoodItem
 
 
 class State(models.Model):
@@ -38,3 +39,15 @@ class Address(models.Model):
     class Meta:
         ordering = ["-created_at"]
         verbose_name_plural = "Addresses"
+
+
+class Favourites(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    fooditem = models.ForeignKey(FoodItem, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.fooditem}"
+
+    class Meta:
+        unique_together = ("user", "fooditem")

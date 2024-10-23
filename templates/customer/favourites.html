@@ -1,0 +1,124 @@
+{% extends 'base_layouts/base.html' %}
+{% load static %}
+
+{% block extra_head %}
+
+{% include 'includes/extraStyles.html' %}
+
+{% endblock %}
+
+
+{% block navbar %}
+    <a href="{% url 'logout' %}">
+        <button type="button" class="btn btn-outline-success">Logout</button>
+    </a>
+{% endblock %}
+
+{% block body %}
+    
+
+
+
+    <!-- Main Section Start -->
+		<div class="main-section">
+			
+			<!-- customer cover image -->
+			 {% include 'includes/customerCover.html' %}
+
+			<div class="page-section account-header buyer-logged-in">
+				<div class="container">
+					<div class="row">
+						<div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
+                            <!-- Load vendor sidebar here -->
+						{% include 'includes/customerSidebar.html' %}
+
+						</div>
+						<div class="col-lg-9 col-md-9 col-sm-12 col-xs-12">
+                            {% if fav_items %}
+							<div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
+
+                                
+                                    {% for item in fav_items %}
+                                    <div class="col" id="fav-block-{{ item.fooditem.slug }}">
+                                        <div class="card shadow-sm rounded">
+                                            
+                                            {% if item.fooditem.is_available %}
+                                            <a href="{% url 'foodItemDetails' item.fooditem.slug %}"><img src="{{ item.fooditem.image.url }}" class="card-img-top" alt="..." style="max-height:200px;" width="200px">
+                                            <span class="badge bg-success position-absolute top-0 start-0 m-2">Available</span></a>
+                                            {% else %}
+                                            <img src="{{ item.fooditem.image.url }}" class="card-img-top" alt="..." height="250px" width="200px" style="filter: grayscale(100%);">
+                                            <span class="badge bg-danger position-absolute top-0 start-0 m-2">Not Available</span>
+                                            {% endif %}
+                                            <div class="card-body">
+                                                <h3 class="card-text">{{ item.fooditem.food_title }}</h3>
+                                                <h6 class="card-text"> {{ item.fooditem.vendor.vendor_name }}</h6>
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <h6 class="text-body-secondary font-weight-bold"><strong>₹{{ item.fooditem.price }}</strong></h6>
+                                    
+                    
+                                                </div>
+                                                <div class="btn-group d-flex justify-content-start gap-2">
+                                                    <button type="button" class="btn btn-sm btn-danger remove_fav" data-id="{{ item.fooditem.slug }}" data-url="{% url 'customerDeleteFavourite' item.id %}">Remove</button></a>
+                                                    <a href="#"><button type="button" class="btn btn-sm btn-success add_to_cart" data-id="{{ item.fooditem.slug }}" data-url="{% url 'addToCart' item.fooditem.slug %}">Add to Cart</button></a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                    
+                    
+                            </div>
+                            {% else %}
+                            <h4 class="text-center">No Favourite food Items Found</h4>
+                            {% endif %}
+						</div>
+                       
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- Main Section End -->
+
+
+    
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // To remove favourtie item
+    jQuery(document).ready(function(){
+        $('.remove_fav').on('click', function(e){
+            e.preventDefault();
+            let item_id = $(this).attr('data-id');
+            let url = $(this).attr('data-url');
+
+            Swal.fire({
+                title: "Are You Sure?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#dc3545",
+                cancelButtonColor: "#53a653",
+                confirmButtonText: "Remove Item"
+            }).then((result) => {
+                if (result.isConfirmed){
+                    // Send get request to the server
+                    $.ajax({
+                        type: 'GET',
+                        url: url,
+                        success: function(response){
+                            if (response.status == "Success"){
+                                document.getElementById("fav-block-"+item_id).remove();
+                            }
+                        }
+                    })
+
+                }
+            })
+            
+           
+        })
+    })
+</script>
+
+{% endblock %}
+

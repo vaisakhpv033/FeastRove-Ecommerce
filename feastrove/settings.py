@@ -86,6 +86,7 @@ TEMPLATES = [
 
                 "accounts.context_processors.get_vendor",
                 "accounts.context_processors.get_paypal_client_id",
+                "accounts.context_processors.get_google_api_key",
 
                 "marketplace.context_processors.get_cart_count",
                 "marketplace.context_processors.get_cart_total",
@@ -216,3 +217,7 @@ RZP_KEY_SECRET = config("RZP_KEY_SECRET")
 
 # Exchange Rate Api
 API_KEY = config("API_KEY")
+
+
+# Google api Key
+GOOGLE_API_KEY = config("GOOGLE_API_KEY")

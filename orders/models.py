@@ -61,6 +61,10 @@ class Order(models.Model):
     def __str__(self):
         return self.order_number
     
+    @property
+    def total_amount(self):
+        return self.total + self.total_tax
+    
 
 
 class OrderedFood(models.Model):
@@ -80,7 +84,7 @@ class OrderedFood(models.Model):
 
     def __str__(self):
         return self.fooditem.food_title
-    
+
 
     @property
     def total_amount(self):
