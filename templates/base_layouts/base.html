@@ -20,10 +20,11 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     
     {% comment %} <script src="https://maps.googleapis.com/maps/api/js?key={{google_api_key}}&libraries=places&callback=initAutoComplete" async defer></script> {% endcomment %}
-
+    {% if '/profile/' in request.path or request.path == '/'  %}
     <script async
     src="https://maps.googleapis.com/maps/api/js?key={{google_api_key}}&loading=async&libraries=places&callback=initAutoComplete">
 </script>
+    {% endif %}
 
     <script src="{% static 'javascript/custom.js' %}"></script>
 </head>

@@ -17,6 +17,7 @@
 
 {% block body %}
 <div class="container-lg my-3">
+        {% if restaurants %}
         {% for restaurant in restaurants %}
         <div class="row g-0 justify-content-center position-relative my-2">
             <div class="col-md-3 mb-md-0 p-md-4 border border-end-0 shadow-sm rounded-start">
@@ -24,11 +25,27 @@
             </div>
             <div class="col-md-5 p-4 ps-md-2 border border-start-0 shadow-sm rounded-end">
               <h5 class="mt-0">{{ restaurant.vendor_name }}</h5>
-              <p class="text-capitalize">{{ restaurant.user_profile.city }}
+              <p class="text-capitalize">{{ restaurant.user_profile.city }}</p>
               <p>Explore the restaurant</p>
+              {% if '/search/' in request.path and restaurant.distance %}
+              <p class="mt-0"><strong>{{ restaurant.distance.km|floatformat:-2 }} Km</strong> away from the {{ address }}</p>
+              {% endif %}
               <a href="{% url 'restaurantDetails' restaurant.vendor_slug %}" class="stretched-link btn btn-success">View Menu</a>
             </div>
         </div>
         {% endfor %}
+        {% else %}
+
+         <!-- No restaurants found -->
+          <div class="alert alert-warning bg-white text-center text-dark mt-4">
+            <h4>No restaurants found!</h4>
+            <p>Looks like we couldn't find any restaurants that match your search.</p>
+            <p>Try adjusting your filters or <strong>exploring other delicious options</strong> nearby.</p>
+            {% comment %} <img src="{% static 'images/empty-plate.png' %}" alt="No restaurants" class="img-fluid my-3" style="max-width: 150px;"> {% endcomment %}
+            <p>Still hungry? Don't give up! There are plenty of great places waiting to be discovered.</p>
+            <a href="{% url 'home' %}" class="btn btn-warning mt-3">Go Back to Home</a>
+        </div>
+
+        {% endif %}
 </div>
 {% endblock %}

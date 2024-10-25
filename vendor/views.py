@@ -142,7 +142,7 @@ def vendor_edit_food(request, slug):
     food = get_object_or_404(FoodItem, slug=slug, vendor=vendor)
     form = FoodItemForm(instance=food, vendor=vendor)
     if request.method == "POST":
-        form = FoodItemForm(request.POST, instance=food, vendor=vendor)
+        form = FoodItemForm(request.POST, request.FILES, instance=food, vendor=vendor)
         if form.is_valid():
             form.save()
             messages.success(request, "FoodItem updated successfully")

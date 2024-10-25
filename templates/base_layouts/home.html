@@ -26,23 +26,30 @@
                     Within few clicks, find delicious dishes waiting nearby
                 </h4>
             </div>
-            <div class="my-search d-none d-md-flex justify-content-center p-3 w-75">
-                <div class="input-group">
-                    <span class="input-group-text rounded-start"><img
-                            src="{% static 'images/svg-icons/location.svg' %}"></span>
-                    <input type="text" class="form-control rounded-end" placeholder="Restaurant Name or Food Name">
-                    <span class="input-group-text ms-3 rounded-start"><img
-                            src="{% static 'images/svg-icons/location.svg' %}"></span>
-                    <input type="text" class="form-control rounded-end" placeholder="All locations">
-                    <select class="form-select ms-3 rounded" id="inputGroupSelect01">
-                        <option selected>Choose radius...</option>
-                        <option value="1">10Km</option>
-                        <option value="2">20Km</option>
-                        <option value="3">30Km</option>
-                    </select>
-                    <button class="btn btn-outline-success ms-3 rounded" type="submit">Search</button>
+            
+                <div class="my-search d-none d-md-flex justify-content-center p-3 w-75">
+                    <form action="{% url 'search' %}" method="GET" class="w-100">
+                    <div class="input-group">
+                        <span class="input-group-text rounded-start"><img
+                                src="{% static 'images/svg-icons/location.svg' %}"></span>
+                        <input type="text" class="form-control rounded-end" name="rest_food" placeholder="Restaurant Name or Food Name">
+                        <span class="input-group-text ms-3 rounded-start"><img
+                                src="{% static 'images/svg-icons/location.svg' %}"></span>
+                        <input type="text" class="form-control rounded-end" id="id_address" name="location" placeholder="All locations" required>
+                        <select class="form-select ms-3 rounded" id="inputGroupSelect01" name="radius" required>
+                            <option selected>Choose radius...</option>
+                            <option value="5">5Km</option>
+                            <option value="10">10Km</option>
+                            <option value="20">20Km</option>
+                            <option value="30">30Km</option>
+                        </select>
+                        <input type="hidden" id="id_latitude" name="latitude" value="">
+                        <input type="hidden" id="id_longitude" name="longitude">
+                        <button class="btn btn-outline-success ms-3 rounded" type="submit">Search</button>
+                    </div>
+                </form>
                 </div>
-            </div>
+            
         </div>
     </section>
 
@@ -103,8 +110,8 @@
                         <span class="badge bg-danger position-absolute top-0 start-0 m-2">Not Available</span>
                         {% endif %}
                         <div class="card-body">
-                            <h3 class="card-text">{{ item.food_title }}</h3>
-                            <h6 class="card-text"> {{ item.vendor.vendor_name }}</h6>
+                            <h6 class="card-text fw-bold text-capitalize">{{ item.food_title }}</h6>
+                            <h6 class="card-text text-capitalize"> {{ item.vendor.vendor_name }}</h6>
                             <div class="d-flex justify-content-between align-items-center">
                                 <h6 class="text-body-secondary font-weight-bold"><strong>₹{{ item.price }}</strong></h6>
                                 <div class="btn-group">

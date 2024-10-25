@@ -7,7 +7,7 @@ from menu.models import FoodItem
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def home(request):
     vendors = Vendor.objects.filter(is_approved=True, user__is_active=True)[:4]
-    food_items = FoodItem.objects.filter(is_available=True)
+    food_items = FoodItem.objects.filter(is_available=True, vendor__is_approved=True)
     context = {
         'restaurants': vendors,
         'food_items': food_items,

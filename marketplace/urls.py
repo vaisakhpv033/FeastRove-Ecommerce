@@ -17,5 +17,7 @@ urlpatterns = [
 
     path('checkout/', views.checkout, name="checkout"),
     path('checkout/addresses/add/', Customerviews.customer_add_address, name="checkoutAddAddress"),
+
+    path('search/', views.search, name="search"),
     
 ]

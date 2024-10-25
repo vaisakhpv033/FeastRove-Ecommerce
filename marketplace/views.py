@@ -3,6 +3,10 @@ from django.db.models import F
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.views.decorators.cache import cache_control
+from django.db.models import Q
+from django.contrib.gis.geos import GEOSGeometry
+from django.contrib.gis.measure import D    # 'D' is Shortcut for Distance
+from django.contrib.gis.db.models.functions import Distance
 
 from customers.models import Address
 from menu.models import Category, FoodItem
@@ -16,9 +20,6 @@ from .models import Cart
 
 def marketplace(request):
     vendors = Vendor.objects.filter(is_approved=True, user__is_active=True)
-    print(vendors)
-    for i in vendors:
-        print(i.vendor_slug)
     context = {
         "restaurants": vendors,
     }
@@ -213,3 +214,45 @@ def checkout(request):
         "addresses": addresses,
     }
     return render(request, "marketplace/checkout.html", context)
+
+
+
+# Search Page
+def search(request):
+    if 'location' not in request.GET or 'radius' not in request.GET:
+        return redirect("home")
+    address = request.GET['location']
+    latitude = request.GET['latitude']
+    longitude = request.GET['longitude']
+    radius = request.GET['radius']
+    keyword = request.GET['rest_food']
+
+
+    # fetch vendors by food id
+    fetch_vendor_lst = FoodItem.objects.filter(
+        food_title__icontains = keyword, is_available = True
+        ).values_list('vendor', flat=True).distinct()
+
+    # if lat and lng present query vendors based on the nearest distance from the address provided
+    if latitude and longitude:
+        pnt = GEOSGeometry("POINT(%s %s)" %(longitude, latitude))
+        vendors = Vendor.objects.filter(
+            (Q(id__in = fetch_vendor_lst) | Q(vendor_name__icontains = keyword)),
+            is_approved=True, 
+            user__is_active=True,
+            user_profile__location__distance_lte=(pnt, D(km=radius))
+        ).annotate(distance=Distance("user_profile__location", pnt)).order_by("distance")
+        
+    else:
+        vendors = Vendor.objects.filter(
+            (Q(id__in = fetch_vendor_lst) | Q(vendor_name__icontains = keyword)),
+            is_approved=True, 
+            user__is_active=True
+        )
+
+
+    context = {
+        'restaurants': vendors,
+        'address': address
+    }
+    return render(request, "marketplace/restaurantListing.html", context)

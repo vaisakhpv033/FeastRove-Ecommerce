@@ -14,6 +14,7 @@ from pathlib import Path
 
 from decouple import config
 from django.contrib.messages import constants as messages
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -46,6 +47,8 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
+
+    'django.contrib.gis',
 
     "accounts",
     "vendor",
@@ -103,7 +106,8 @@ WSGI_APPLICATION = "feastrove.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql",
+        # "ENGINE": "django.db.backends.postgresql",
+        "ENGINE": "django.contrib.gis.db.backends.postgis",
         "NAME": config("DB_NAME"),
         "USER": config("DB_USER"),
         "PASSWORD": config("DB_PASSWORD"),
@@ -221,3 +225,14 @@ API_KEY = config("API_KEY")
 
 # Google api Key
 GOOGLE_API_KEY = config("GOOGLE_API_KEY")
+
+
+
+# Add the GDAL binaries directory to the system PATH
+os.environ['PATH'] = os.path.join(BASE_DIR, 'env/Lib/site-packages/osgeo') + ';' + os.environ['PATH']
+
+# Set the path to the GDAL projection data directory
+os.environ['PROJ_LIB'] = os.path.join(BASE_DIR, 'env/Lib/site-packages/osgeo/data/proj')
+
+# path to GDAL library
+GDAL_LIBRARY_PATH = os.path.join(BASE_DIR, 'env/Lib/site-packages/osgeo/gdal.dll')
