@@ -1,25 +1,26 @@
 import razorpay
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.cache import cache_control
 from django.views.decorators.http import require_POST
 
-from accounts.utils import send_notification
+from accounts.utils import send_notification, check_role_customer
 from customers.models import Address
 from feastrove.settings import RZP_KEY_ID, RZP_KEY_SECRET
 from marketplace.context_processors import get_cart_count, get_cart_total
 from marketplace.models import Cart
 
 from .models import Order, OrderedFood, Payment
-from .utils import inr_to_usd, save_order_details
+from .utils import inr_to_usd, save_order_details, verify_signature
 
 client = razorpay.Client(auth=(RZP_KEY_ID, RZP_KEY_SECRET))
 
 
 # Create your views here.
-@login_required
+@login_required(login_url='login')
+@user_passes_test(check_role_customer)
 @require_POST
 @cache_control(no_cache=True, no_store=True, must_revalidate=True)
 def place_order(request):
@@ -35,6 +36,10 @@ def place_order(request):
     if order:
         cart_items = Cart.objects.filter(user=request.user).order_by("-created_at")
 
+        # assigning vendor to the order
+        order.vendor = cart_items[0].fooditem.vendor
+        order.save()
+
         # Razorpay
         if order.payment_method == "razorpay":
             amount = int(cart_totals["grand_total"] * 100)
@@ -45,6 +50,8 @@ def place_order(request):
             }
             payment = client.order.create(data=data)
             rzp_order_id = payment["id"]
+
+            request.session["rzp_order_id"] = rzp_order_id
 
             context = {
                 "cart_items": cart_items,
@@ -74,7 +81,8 @@ def place_order(request):
     return redirect(request, "checkout")
 
 
-@login_required
+@login_required(login_url='login')
+@user_passes_test(check_role_customer)
 @require_POST
 @cache_control(no_store=True, no_cache=True, must_revalidate=True)
 def payments(request):
@@ -83,6 +91,15 @@ def payments(request):
         transaction_id = request.POST.get("transaction_id")
         payment_method = request.POST.get("payment_method")
         status = request.POST.get("status")
+        razorpay_signature = request.POST.get("razorpay_signature")
+        
+        order_id = request.session.get('rzp_order_id')
+
+        # verify the payment through signature generation
+        if payment_method == 'Razorpay':
+            if not verify_signature(order_id, transaction_id, razorpay_signature):
+                return JsonResponse({"error": "Payment Verification Failed"}, status=403)
+
 
         if not all([order_number, transaction_id, payment_method, status]):
             return JsonResponse({"error": "Invalid Payment details"}, status=400)
@@ -138,6 +155,8 @@ def payments(request):
             to_email=list(to_emails),
         )
         cart_items.delete()
+        if order.payment_method == "razorpay":
+            del request.session['rzp_order_id']
         response = {
             "message": "Success",
             "order_number": order_number,
@@ -147,7 +166,8 @@ def payments(request):
     return JsonResponse({"status": "Failed", "message": "Invalid Request"})
 
 
-@login_required
+@login_required(login_url='login')
+@user_passes_test(check_role_customer)
 @require_POST
 @cache_control(no_store=True, no_cache=True, must_revalidate=True)
 def payment_cod(request):
@@ -205,7 +225,8 @@ def payment_cod(request):
     return JsonResponse({"status": "Failed", "message": "Invalid Request"})
 
 
-@login_required
+@login_required(login_url='login')
+@user_passes_test(check_role_customer)
 @cache_control(no_store=True, no_cache=True, must_revalidate=True)
 def order_complete(request):
     order_number = request.GET.get("order-no")

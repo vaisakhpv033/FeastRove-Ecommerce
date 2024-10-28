@@ -1,14 +1,14 @@
 
 <div class="user-account-nav user-account-sidebar">
-    <div class="user-nav-list">
-        <ul>
+    <div class="user-nav-list mb-0 bg-secondary-subtle">
+        <ul class="d-flex flex-column flex-md-row">
             <li class="{% if '/accounts/vendor/Dashboard/' == request.path or '/accounts/vendor/' == request.path %} active {% endif %}"><a href="{% url 'vendorDashboard' %}"><i class="icon-dashboard3"></i>Dashboard</a></li>
             <li class="{% if 'profile' in request.path %} active {% endif %}"><a href="{% url 'vendorProfile' %}"><i class="icon-building"></i>My Restaurant</a></li>
             <li class="{% if 'menu-builder' in request.path %} active {% endif %}"><a href="{% url 'vendorMenuBuilder' %}"><i class="icon-menu5"></i>Menu Builder</a></li>
-            <li><a href="#"><i class="icon-add_shopping_cart"></i>Orders</a></li>
+            <li class="{% if 'orders/' in request.path %} active {% endif %}"><a href="{% url 'vendorOrdersAll' %}"><i class="icon-add_shopping_cart"></i>Orders</a></li>
             <li><a href="#"><i class="icon-money"></i>Earnings</a></li>
             <li><a href="#"><i class="icon-file-text22"></i>Opening Hours</a></li>
-            <li><a href="#"><i class="icon-unlock-alt"></i>Change Password</a></li>
+            {% comment %} <li><a href="#"><i class="icon-unlock-alt"></i>Change Password</a></li> {% endcomment %}
             <li><a class="logout-btn" href="{% url 'logout' %}"><i class="icon-log-out"></i>Signout</a></li>
         </ul>
     </div>

@@ -26,6 +26,7 @@ class Vendor(models.Model):
     modified_at = models.DateTimeField(auto_now=True)
 
     def save(self, *args, **kwargs):
+        """To send email to the vendor regarding the status of approval changes"""
         if self.pk is not None:
             # update
             orig = Vendor.objects.get(pk=self.pk)

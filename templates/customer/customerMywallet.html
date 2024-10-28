@@ -1,0 +1,103 @@
+{% extends 'base_layouts/base.html' %}
+{% load static %}
+
+{% block extra_head %}
+
+{% include 'includes/extraStyles.html' %}
+
+{% endblock %}
+
+
+{% block navbar %}
+<a href="{% url 'logout' %}">
+    <button type="button" class="btn btn-outline-success">Logout</button>
+</a>
+{% endblock %}
+
+{% block body %}
+
+
+
+
+<!-- Main Section Start -->
+<div class="main-section">
+
+    <!-- customer cover image -->
+    {% include 'includes/customerCover.html' %}
+
+    <div class="page-section account-header buyer-logged-in">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
+                    <!-- Load vendor sidebar here -->
+                    {% include 'includes/customerSidebar.html' %}
+
+                </div>
+
+                <div class="col-lg-9 col-md-9 col-sm-12 col-xs-12">
+                    <div class="user-dashboard loader-holder">
+                        <div class="user-holder">
+
+
+
+
+                            <h2>My Wallet</h2>
+                            <!-- My Restaurants Form Start -->
+                            
+                            
+                                <div class="container mt-4 px-0">
+                                    <div class="card text-bg-light mb-3" style="max-width: 18rem;">
+                                        <div class="card-header fw-medium icon-wallet text-feastrove-dark text-center bg-dark">&nbspAvailable Balance</div>
+                                        <div class="card-body text-center bg-dark-subtle">
+                                          <p class="card-title fw-bolder fs-6  text-dark">{{ wallet.balance }}</p>
+                                        </div>
+                                      </div>
+                                </div>
+                                <hr>
+                                <h6>Transactions</h6>
+                                
+                                    {% if transactions %}
+                                    {% for transaction in transactions %}
+                                    <div class="card mb-2 {% if transaction.transaction_type == 'WITHDRAW' %}bg-danger-subtle{% else %}bg-success-subtle{% endif %}">
+                                        
+                                        <div class="card-body">
+                                            <h6 class="card-title">No: {{ transaction.transaction_no }}&nbsp&nbsp&nbspDate: {{ transaction.created_at|date }}</h6>
+                                            <div class="d-flex justify-content-between">
+                                              <div class="">
+                                                    
+                                                    <p class="card-text my-0 text-capitalize">Transaction Type:&nbsp{{ transaction.transaction_type }}</p>
+                                                    {% if transaction.transaction_type == 'REFUND' %}
+                                                    <p class="card-text my-0">For Order-No: {{ transaction.order.order_number }}</p>
+                                                    {% endif %}
+                                                    {% if transaction.description %}
+                                                    <p class="card-text my-0">{{ transaction.description }}</p>
+                                                    {% endif %}
+                                                  
+                                              </div>
+                                              <div class="">
+                                                  <p class="text-center text-capitalize">Amount: <strong>&nbsp₹{{ transaction.amount }}</strong></p>
+                                              </div>
+                                            </div>
+                                        </div>
+                                      </div>
+                                    {% endfor %}
+                                    {% else %}
+                                    <h6>No Transaction details found</h6>
+                                    {% endif %}
+
+                                
+                            
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Main Section End -->
+
+
+
+{% endblock %}

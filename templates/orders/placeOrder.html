@@ -229,9 +229,11 @@
             $('#content-wrapper').addClass('blur-background');
             $('body').addClass('no-scroll');
             var transaction_id = response.razorpay_payment_id;
+            var razorpay_signature = response.razorpay_signature;
+            var razorpay_order_id = response.razorpay_order_id;
             var payment_method = 'Razorpay';            
-            var status = 'success';
-            sendTransaction(transaction_id, payment_method, status);
+            var status = 'COMPLETED';
+            sendTransaction(transaction_id, payment_method, status, razorpay_order_id=razorpay_order_id, razorpay_signature=razorpay_signature);
         },
         "prefill": {
             "name": "{{ order.full_name }}",
@@ -265,7 +267,7 @@
 
 
     // Send the data to payments view to store in the database
-    function sendTransaction(transactionId, payment_method, status) {
+    function sendTransaction(transactionId, payment_method, status, razorpay_order_id=null, razorpay_signature=null ) {
         $.ajax({
             type: 'POST',
             url: url,
@@ -274,6 +276,8 @@
                 'transaction_id': transactionId,
                 'payment_method': payment_method,
                 'status': status,
+                'razorpay_order_id': razorpay_order_id,
+                'razorpay_signature': razorpay_signature,
                 'csrfmiddlewaretoken': csrftoken
             },
             success: function (response) {

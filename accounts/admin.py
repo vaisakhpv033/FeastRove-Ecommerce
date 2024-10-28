@@ -9,7 +9,7 @@ class CustomUserAdmin(UserAdmin):
     list_filter = ()
     fieldsets = ()
 
-    list_display = ("email", "first_name", "last_name", "role", "is_active")
+    list_display = ("email", "first_name", "last_name", "role", "is_active", "is_admin")
     ordering = ("-date_joined",)
 
 

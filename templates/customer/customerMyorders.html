@@ -1,0 +1,102 @@
+{% extends 'base_layouts/base.html' %}
+{% load static %}
+
+{% block extra_head %}
+
+{% include 'includes/extraStyles.html' %}
+
+{% endblock %}
+
+
+{% block navbar %}
+<a href="{% url 'logout' %}">
+    <button type="button" class="btn btn-outline-success">Logout</button>
+</a>
+{% endblock %}
+
+{% block body %}
+
+
+
+
+<!-- Main Section Start -->
+<div class="main-section">
+
+    <!-- customer cover image -->
+    {% include 'includes/customerCover.html' %}
+
+    <div class="page-section account-header buyer-logged-in">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
+                    <!-- Load vendor sidebar here -->
+                    {% include 'includes/customerSidebar.html' %}
+
+                </div>
+
+                <div class="col-lg-9 col-md-9 col-sm-12 col-xs-12">
+                    <div class="user-dashboard loader-holder">
+                        <div class="user-holder">
+
+
+
+
+                            <h2>My Orders</h2>
+                            <!-- My Restaurants Form Start -->
+                            <table class="table table-hover table-borderless">
+                                <hr>
+                                <tbody>
+
+                                    {% for order in orders %}
+                                    <div class="card mb-2 my-orders" data-url="{% url 'customerMyOrderDetails' order.order_number %}">
+                                        
+                                        <div class="card-body">
+                                          <h5 class="card-title">No: {{ order.order_number }}&nbsp&nbsp&nbspDate: {{ order.created_at|date }}</h5>
+                                          <div class="d-flex justify-content-between">
+                                            <div class="">
+                                                <p class="card-text my-0 text-capitalize">payment-method:{{ order.payment_method }}</p>
+                                                <p class="card-text my-0 text-capitalize">status: <span class="{% if order.status == 'New' %}text-info{% elif order.status == 'Accepted' or order.status == 'Completed' %}text-success{% else %}text-danger{% endif %} fw-bold">{{ order.status }}</span></p>
+                                                <a href="{% url 'customerMyOrderDetails' order.order_number %}" class="stretched-link text-decoration-none" hidden>Details</a>
+                                            </div>
+                                            <div class="">
+                                                <p class="text-center text-capitalize">Total: <strong>₹{{ order.total_amount }}</strong></p>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    {% endfor %}
+
+                                </tbody>
+                            </table>
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Main Section End -->
+
+
+
+{% endblock %}
+
+{% block extra_js %}
+
+<script>
+    jQuery(document).ready(function(){
+        $('.my-orders').on('click', function(e){
+            e.preventDefault();
+            let url = $(this).attr('data-url');
+            window.location.href = url;
+
+        })
+    })
+</script>
+
+{% endblock %}
+
+
+

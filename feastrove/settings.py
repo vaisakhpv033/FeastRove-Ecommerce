@@ -57,6 +57,8 @@ INSTALLED_APPS = [
     "customers",
     "marketplace",
     "orders",
+    "wallets",
+    "reviews",
 ]
 
 SITE_ID = 1

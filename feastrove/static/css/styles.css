@@ -135,3 +135,13 @@ Spinner or loader
 body.no-scroll {
     overflow: hidden;
 }
+
+
+
+/***************************************************
+orders card hover
+***************************************************/
+.my-orders:hover {
+    background-color: rgb(226, 227, 229);
+    cursor: pointer;
+}

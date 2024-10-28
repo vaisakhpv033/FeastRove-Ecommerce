@@ -1,0 +1,110 @@
+
+{% extends 'base_layouts/base.html' %}
+{% load static %}
+
+{% block body %}
+
+<div class="container mt-5 mb-5">
+    <div class="justify-content-center row">
+        <div class="col-12 col-md-10">
+            <div class="bg-dark p-3 px-5">
+            <img src="{% static 'images/svg-icons/logo.svg' %}" alt="feastrove Logo" width="240">
+            <p class="text-center float-end">
+            <span class="badge rounded-pill text-bg-{% if order.status == 'New' %}info{% elif order.status == 'Accepted' or order.status == 'Completed' %}success{% else %}danger{% endif %} fs-6">{{ order.status }}</span></p>
+            </div>
+        </div>
+        <div class="col-12 col-md-10">
+            <div class="bg-success-subtle p-5 pt-2">
+                {% if order.status == 'New' %}
+                <p class="text-info">Your order has been placed and is awaiting vendor acceptance.</p>
+                {% elif order.status == 'Accepted' %}
+                <p class="text-success">Your order has been accepted by the vendor and is being prepared.</p>
+
+                {% elif order.status == 'Completed' %}
+                <p class="text-success">Your order has been successfully completed and delivered. Thank you for shopping with us!</p>
+
+                {% elif order.status == 'Cancelled' %}
+                <p class="text-danger">Your order has been cancelled by the vendor. Please contact support for further assistance if needed.</p>
+
+                {% endif %}
+                <hr>
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <span class="d-block">Order Date: </span><span class="fw-medium text-capitalize">{{ order.created_at }}</span>
+                    </div>
+
+                    <div>
+                        <span class="d-block">Order No: </span><span class="fw-medium">{{ order.order_number }}</span>
+                    </div>
+
+                    <div>
+                        <span class="d-block">Payment Method: </span><span class="fw-medium text-capitalize">{{ order.payment_method }}</span>
+                    </div>
+
+                    <div>
+                        <span class="d-block">Transaction ID: </span><span class="fw-medium">{{ order.payment.transaction_id }}</span>
+                    </div>
+
+                </div>
+                <hr>
+
+                <h6 class="text-start px-2 mt-2 mb-0">Delivery Address:</h6>
+                <div class="card mb-0 border-0 bg-success-subtle">
+
+                    <div class="card-body pt-1">
+                        <p class="card-text my-0">{{ order.address }},&nbsp{{ address.road_name }},&nbsp{% if address.landmark %}{{ address.landmark }}{% endif %}</p>
+                        <p class="card-text my-0 text-capitalize"><span class="pe-2">mobile Number: {{ order.phone_number}}</span><span class="px-2">State: {{ order.state }}</span><spanclass="px-2">City: {{ order.city }}</span></p>
+                        <p class="card-text mb-0">Pincode: {{ order.pincode }}</p>
+                    </div>
+                </div>
+                <hr>
+
+                <h6 class="text-start px-2 mt-2 mb-1">Ordered Items:</h6>
+                {% for item in order_items %}
+                    <div class="col pb-2">
+                        <div class="card rounded flex-row bg-transparent">
+
+                            
+                            <img src="{{ item.fooditem.image.url }}"
+                                    class="card-img-top" alt="..." height="125px" width="100px" style="max-width: 100px; padding:5px;">
+                            
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h6 class="card-text fw-medium">{{ item.fooditem.food_title }}</h6>
+                                    <h6 class="card-text fw-medium">₹{{ item.total_amount }}</h6>
+                                </div>
+                                <p class="card-text m-0 mb-1"> {{ item.fooditem.vendor.vendor_name }}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h6 class="text-body-secondary font-weight-bold">Price: <strong>₹{{ item.price }}</strong></h6>
+                                    <h6 class="text-body-secondary font-weight-medium">Quantity: {{ item.quantity }}</h6>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+                <hr>
+                <div class="d-flex justify-content-between">
+                    <div class="">
+                        {% if order.payment.status == 'COMPLETED' %}
+    
+                        <img src="{% static 'images/payment-logo/paid.png' %}" width="200px">
+                        {% endif %}
+                    </div>
+                    <div class="d-flex flex-column px-3 w-25">
+                        <h6 class="text-center fw-medium">Summary</h6>
+                        <div class="d-flex justify-content-between"><span>Subtotal: </span><span class="fw-medium">₹{{ order.total }}</span></div>
+                        <div class="d-flex justify-content-between"><span>Tax: </span><span class="fw-medium">₹{{ order.total_tax }}</span></div>
+                        <hr>
+                        <div class="d-flex justify-content-between fw-bold"><span>Total: </span><span>₹{{ order.total_amount }}</span></div>
+                    </div>
+                </div>
+
+
+            </div>
+            
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

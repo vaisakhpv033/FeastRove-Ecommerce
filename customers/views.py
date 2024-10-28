@@ -14,6 +14,8 @@ from menu.models import FoodItem
 
 from .forms import AddressForm
 from .models import Address, Favourites
+from orders.models import Order, OrderedFood
+from wallets.models import Wallet, WalletTransaction
 
 
 
@@ -82,6 +84,9 @@ def customer_add_address(request):
         form = AddressForm(request.POST)
         if form.is_valid():
             address = form.save(commit=False)
+            def_address = Address.objects.filter(user=request.user)
+            if not def_address:
+                address.is_default = True
             address.user = request.user
             address.save()
             messages.success(request, "Address added successfully")
@@ -114,6 +119,7 @@ def customer_edit_address(request, address_id):
 
 
 @login_required(login_url="login")
+@user_passes_test(check_role_customer)
 def customer_delete_address(request, address_id):
     if request.headers.get("x-requested-with") == "XMLHttpRequest":
         try:
@@ -128,7 +134,9 @@ def customer_delete_address(request, address_id):
             )
     return JsonResponse({"status": "Failed", "message": "Invalid request"})
 
-
+@login_required(login_url="login")
+@user_passes_test(check_role_customer)
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def customer_favourites(request):
     fav_items = Favourites.objects.filter(user=request.user).order_by("-created_at")
     context = {
@@ -138,6 +146,7 @@ def customer_favourites(request):
 
 
 @login_required(login_url="login")
+@user_passes_test(check_role_customer)
 def customer_add_fav_item(request, food_item_slug):
     if request.headers.get("x-requested-with") == "XMLHttpRequest":
         try:
@@ -169,6 +178,7 @@ def customer_add_fav_item(request, food_item_slug):
 
 
 @login_required(login_url="login")
+@user_passes_test(check_role_customer)
 def customer_remove_fav_item(request, fav_item_id):
     if request.headers.get("x-requested-with") == "XMLHttpRequest":
         try:
@@ -181,3 +191,42 @@ def customer_remove_fav_item(request, fav_item_id):
             return JsonResponse({"status": "Failed", "message": "Item Does not Exist"})
     else:
         return JsonResponse({"status": "Failed", "message": "Invalid Request"})
+
+
+@login_required(login_url='login')
+@user_passes_test(check_role_customer)
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+def customer_my_orders(request):
+    orders = Order.objects.filter(user=request.user, is_ordered=True).order_by('-created_at')
+
+    context = {
+        'orders': orders
+    }
+    return render(request, "customer/customerMyOrders.html", context)
+
+
+@login_required(login_url='login')
+@user_passes_test(check_role_customer)
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+def customer_my_order_details(request, order_number):
+    order = get_object_or_404(Order, user=request.user, order_number=order_number, is_ordered=True)
+    order_items = OrderedFood.objects.filter(user=request.user, order=order)
+
+    context = {
+        'order': order,
+        'order_items': order_items,
+    }
+    return render(request, "customer/customerMyOrderDetails.html", context)
+
+
+@login_required(login_url='login')
+@user_passes_test(check_role_customer)
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+def customer_wallet(request):
+    wallet = Wallet.objects.get(user=request.user)
+    wallet_transactions = WalletTransaction.objects.filter(wallet=wallet)
+    context = {
+        'wallet': wallet,
+        'transactions': wallet_transactions,
+    }
+    return render(request, "customer/customerMyWallet.html", context)

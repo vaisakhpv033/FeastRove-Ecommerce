@@ -2,9 +2,10 @@ from django.db import models
 from accounts.models import User
 from menu.models import FoodItem
 from vendor.models import Vendor
-from customers.models import mobile_number_validator, pincode_validator, State
+from customers.models import mobile_number_validator, pincode_validator
 from django.core.validators import MaxValueValidator
 from menu.validators import validate_positive_price
+
 
 class Payment(models.Model):
     PAYMENT_METHOD = (
@@ -35,7 +36,7 @@ class Order(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     payment = models.ForeignKey(Payment, on_delete=models.SET_NULL, blank=True, null=True)
-    vendors = models.ManyToManyField(Vendor, blank=True)
+    vendor = models.ForeignKey(Vendor, on_delete=models.PROTECT, null=True, blank=True)
     order_number = models.CharField(max_length=30, unique=True)
     full_name = models.CharField(max_length=100)
     email = models.EmailField(max_length=50)
@@ -61,6 +62,19 @@ class Order(models.Model):
     def __str__(self):
         return self.order_number
     
+    def save(self, *args, **kwargs):
+        """refund the amount to the wallet of the user if order status is cancelled and the payment method is not COD"""
+        if self.pk is not None:
+            current = Order.objects.get(pk=self.pk)
+            if current.status != self.status and self.status == 'Cancelled' and self.payment_method in ['razorpay', 'paypal']:
+                super().save(*args, **kwargs)
+                from wallets.models import Wallet # to avoid circular import 
+                user_wallet = Wallet.objects.get(user=self.user)
+                user_wallet.refund(amount = self.total_amount, order = self, description="Refund completed")
+                return
+        return super().save(*args, **kwargs)
+
+    
     @property
     def total_amount(self):
         return self.total + self.total_tax
@@ -71,7 +85,7 @@ class OrderedFood(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
     payment = models.ForeignKey(Payment, on_delete=models.SET_NULL, blank=True, null=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    fooditem = models.ForeignKey(FoodItem, on_delete=models.CASCADE)
+    fooditem = models.ForeignKey(FoodItem, on_delete=models.PROTECT)
     quantity = models.PositiveIntegerField(
         validators=[MaxValueValidator(5, "Maximum allowed quantity is 5")]
     )

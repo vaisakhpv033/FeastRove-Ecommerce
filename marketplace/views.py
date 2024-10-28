@@ -1,4 +1,4 @@
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db.models import F
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
@@ -11,6 +11,7 @@ from django.contrib.gis.db.models.functions import Distance
 from customers.models import Address
 from menu.models import Category, FoodItem
 from vendor.models import Vendor
+from accounts.utils import check_role_customer
 
 from .context_processors import get_cart_count, get_cart_total
 from .models import Cart
@@ -64,6 +65,7 @@ def food_item_details(request, slug):
 
 
 @login_required(login_url="login")
+@user_passes_test(check_role_customer)
 @cache_control(no_cache=True, no_store=True, must_revalidate=True)
 def cart(request):
     cart_items = Cart.objects.filter(user=request.user).order_by("-created_at")
@@ -75,10 +77,21 @@ def cart(request):
 
 def add_to_cart(request, slug):
     if request.user.is_authenticated:
-        if request.headers.get("x-requested-with") == "XMLHttpRequest":
+        if request.headers.get("x-requested-with") == "XMLHttpRequest" and request.user.role == 2:
             # Check if the fooditem exists
             try:
                 fooditem = FoodItem.objects.get(slug=slug)
+                vendor = fooditem.vendor
+
+                cart_items = Cart.objects.filter(user=request.user)
+                if cart_items.exists():
+                    # get the vendor of the items in the current cart
+                    current_vendor = cart_items.first().fooditem.vendor
+
+                    # if the vendors are different delete the cart items
+                    if current_vendor != vendor:
+                        cart_items.delete()
+
 
                 # Try to get the cart item or create it if it doesn't exist
                 cart_item, created = Cart.objects.get_or_create(
@@ -130,7 +143,7 @@ def add_to_cart(request, slug):
 
 def decrease_from_cart(request, slug):
     if request.user.is_authenticated:
-        if request.headers.get("x-requested-with") == "XMLHttpRequest":
+        if request.headers.get("x-requested-with") == "XMLHttpRequest" and request.user.role == 2:
             # Check if the fooditem exists
             try:
                 food_item = FoodItem.objects.get(slug=slug)
@@ -173,7 +186,7 @@ def decrease_from_cart(request, slug):
 
 def remove_cart_item(request, cart_id):
     if request.user.is_authenticated:
-        if request.headers.get("x-requested-with") == "XMLHttpRequest":
+        if request.headers.get("x-requested-with") == "XMLHttpRequest" and request.user.role == 2:
             try:
                 cart_item = Cart.objects.get(user=request.user, id=cart_id)
                 cart_item.delete()
@@ -204,6 +217,7 @@ def remove_cart_item(request, cart_id):
 
 
 @login_required(login_url="login")
+@user_passes_test(check_role_customer)
 @cache_control(no_cache=True, no_store=True, must_revalidate=True)
 def checkout(request):
     addresses = Address.objects.filter(user=request.user)

@@ -17,4 +17,9 @@ urlpatterns = [
     path("menu-builder/food/add/", views.vendor_add_food, name="vendorAddFood"),
     path("menu-builder/food/<slug:slug>/edit/", views.vendor_edit_food, name="vendorEditFood"),
     path("menu-builder/food/<slug:slug>/details/", views.vendor_food_details, name="vendorFoodDetails"),
+
+
+    # orders
+    path("orders/all/", views.vendor_orders_all, name="vendorOrdersAll"),
+    path("orders/update-status/", views.vendor_update_order_status, name="vendorUpdateStatus")
 ]

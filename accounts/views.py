@@ -18,6 +18,7 @@ from vendor.forms import VendorForm
 
 from .forms import UserForm
 from .models import User, UserProfile
+from wallets.models import Wallet
 from vendor.models import Vendor
 
 
@@ -82,6 +83,8 @@ def activate(request, uidb64, token):
     if user is not None and default_token_generator.check_token(user, token):
         user.is_active = True
         user.save()
+        # create the wallet for the user
+        Wallet.objects.create(user=user)
         messages.success(request, "Congratulations Your account is activated")
         return redirect("myAccount")
     else:

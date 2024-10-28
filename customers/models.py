@@ -30,6 +30,7 @@ class Address(models.Model):
     address = models.CharField(max_length=255)
     road_name = models.CharField(max_length=100)
     landmark = models.CharField(max_length=255, blank=True, null=True)
+    is_default = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

@@ -16,4 +16,9 @@ urlpatterns = [
     path("favourites/", views.customer_favourites, name="customerFavourites"),
     path("favourites/<slug:food_item_slug>/add/", views.customer_add_fav_item, name="customerAddFavourite"),
     path("favourites/<int:fav_item_id>/delete/", views.customer_remove_fav_item, name="customerDeleteFavourite"),
+
+    path("my-orders/", views.customer_my_orders, name="customerMyOrders"),
+    path("my-orders/<str:order_number>/details/", views.customer_my_order_details, name="customerMyOrderDetails"),
+
+    path("my-wallet/", views.customer_wallet, name="customerMyWallet"),
 ]

@@ -1,0 +1,83 @@
+{% extends 'base_layouts/base.html' %}
+{% load static %}
+{% load custom_filters %}
+
+{% block extra_head %}
+	{% include 'includes/extraStyles.html' %}
+{% endblock %}
+
+{% block navbar %}
+    <a href="{% url 'logout' %}">
+        <button type="button" class="btn btn-outline-success">Logout</button>
+    </a>
+{% endblock %}
+
+
+{% block body %}
+    <!--  Modal section -->
+    {% include 'includes/modal.html' %}
+
+    <!-- Main Section Start -->
+		<div class="main-section">
+			{% include 'includes/vendorCover.html' %}
+			<div class="page-section account-header buyer-logged-in">
+				<div class="container p-0">
+					
+                    <div class="col-12">
+                        <!-- Load vendor sidebar here -->
+                    {% include 'includes/vendorSidebar.html' %}
+
+                    </div>
+
+
+                    {% for order in orders %}
+                    <div class="row mt-2">
+                        <div class="col-12">
+                            
+                            
+                            <div class="card mb-2 my-orders" data-url="{% url 'customerMyOrderDetails' order.order_number %}">
+                                
+                                <div class="card-body">
+                                  <h5 class="card-title">No: {{ order.order_number }}&nbsp&nbsp&nbspDate: {{ order.created_at|date }}</h5>
+                                  <div class="d-flex justify-content-between">
+                                    <div class="">
+                                        <p class="card-text my-0 text-capitalize">Delivery Address: {{ order.address }}</p>
+                                        <p class="card-text my-0 text-capitalize">payment: <span class={% if order.payment.status == 'COMPLETED' %}text-success fw-bold{% endif %}><strong>{{ order.payment.status }}</strong></span>&nbsp&nbsp&nbsp payment-method: {{ order.payment_method }}</p>
+                                        <p class="card-text my-0 text-capitalize">status: <span class="{% if order.status == 'New' %}text-info{% elif order.status == 'Accepted' or order.status == 'Completed' %}text-success{% else %}text-danger{% endif %} fw-bold" id="status-{{ order.order_number }}">{{ order.status }}</span></p>
+                                        {% if order.status == 'New' or order.status == 'Accepted' %}
+                                        <div class="input-group" id="data-{{ order.order_number }}">
+                                            <select class="form-select" id="{{ order.order_number }}" aria-label="Default select example" required>
+                                                <option value="" disabled selected hidden>Change Status</option>
+                                                {% for status in VALID_STATUS_TRANSITIONS|get_item:order.status %}
+                                                <option value="{{ status }}">{{ status }}</option>
+                                                {% endfor %}
+                                            </select>
+                                            <button class="btn btn-secondary status-button" type="button" id="button-addon1" data-no="{{ order.order_number }}" data-url={% url 'vendorUpdateStatus' %}>Change Status</button>
+                                        </div>
+                                        {% endif %}
+                                       
+                                        
+                                    </div>
+                                    <div class="">
+                                        <p class="text-center text-capitalize fw-bold">Total: <strong>₹{{ order.total_amount }}</strong></p>
+                                    </div>
+                                  </div>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    {% endfor %}
+                    
+				</div>
+			</div>
+		</div>
+		<!-- Main Section End -->
+
+{% endblock %}
+
+{% block extra_js %}
+
+<script src="{% static 'javascript/vendor_extra.js' %}"></script>
+
+{% endblock %}

@@ -62,11 +62,11 @@
                                     <div class="card mb-2" id="address-{{ address.id }}">
                                         
                                         <div class="card-body">
-                                          <h5 class="card-title">{{ address }}</h5>
+                                          <h5 class="card-title">{{ address }} {% if address.is_default %}<span class="badge text-bg-warning">Default</span>{% endif %}</h5>
                                           <p class="card-text my-0">{{ address.address }},&nbsp{{ address.road_name }},&nbsp{% if address.landmark %}{{ address.landmark }}{% endif %}</p>
                                           <p class="card-text my-0 text-capitalize"><span class="pe-2">ph: {{ address.phone_number }}</span> <span class="px-2">State: {{ address.state }}</span> <span class="px-2">City: {{ address.city }}</span></p>
                                           <p class="card-text mb-1">Pincode: {{ address.pincode }}</p>
-                                          <div class="d-flex">
+                                          <div class="d-flex gap-2">
                                           <a href="{% url 'customerEditAddress' address.id %}" class="btn btn-warning">Edit</a>
 
                                         
@@ -100,8 +100,8 @@
         $('.delete_address').on('click', function(e){
             e.preventDefault();
 
-            var url = $(this).attr('data-url'); 
-            var address_id = $(this).attr('data-id'); 
+            let url = $(this).attr('data-url'); 
+            let address_id = $(this).attr('data-id'); 
             console.log(url, address_id)
 
             Swal.fire({
