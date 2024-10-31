@@ -49,9 +49,7 @@
                                     </button>
 
                                     <!-- quantity button -->
-                                    <button type="button" class="btn btn-sm btn-success" id="qty-{{ item.fooditem.slug }}">
-                                        {{ item.quantity }}
-                                    </button>
+                                    <button type="button" class="btn btn-sm btn-success" id="qty-{{ item.fooditem.slug }}">{{ item.quantity }}</button>
 
                                     <!-- Add to cart button -->
                                     <button type="button" class="btn btn-sm btn-outline-success add_cart_item" data-id="{{ item.fooditem.slug }}" data-url="{% url 'addToCart' item.fooditem.slug %}">
@@ -209,6 +207,11 @@
             cart_id = $(this).attr('id');
             data = {
                 food_slug: food_id,
+            }
+
+            let qty = $('#qty-'+food_id).text().trim();
+            if (qty === '1') {
+                return false
             }
             
             $.ajax({

@@ -1,28 +1,50 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.db.models import Q
+from django.db.models import Q, Count
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.cache import cache_control
 from django.views.decorators.http import require_POST
-from django.http import JsonResponse
 
 from accounts.forms import UserProfileForm
 from accounts.models import UserProfile
 from accounts.utils import check_role_vendor
 from menu.forms import CategoryForm, FoodItemForm
 from menu.models import Category, FoodItem
-from orders.models import Order
+from orders.models import Order, OrderedFood
 
 from .forms import VendorForm
 from .models import Vendor
 
-
 VALID_STATUS_TRANSITIONS = {
-    'New': ['Accepted', 'Cancelled'],
-    'Accepted': ['Completed', 'Cancelled'],
-    'Completed': [],
-    'Cancelled': [],
+    "New": ["Accepted", "Cancelled"],
+    "Accepted": ["Completed", "Cancelled"],
+    "Completed": [],
+    "Cancelled": [],
 }
+
+
+@login_required(login_url="login")
+@user_passes_test(check_role_vendor)
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+def vendor_dashboard(request):
+    vendor = get_object_or_404(Vendor, user=request.user)
+    orders = Order.objects.filter(vendor=vendor, is_ordered=True).order_by('-created_at')
+
+    order_summary = orders.aggregate(
+        total_order_count = Count('id'),
+        completed_count = Count('id', filter=Q(status='Completed')),
+        cancelled_count = Count('id', filter=Q(status='Cancelled'))
+    )
+    print(order_summary)
+    context = {
+        'order': orders,
+        'total_order_count': order_summary['total_order_count'],
+        'completed_count': order_summary['completed_count'],
+        'cancelled_count': order_summary['cancelled_count']
+    }
+    return render(request, "accounts/vendorDashboard.html", context)
+
 
 # Create your views here.
 @login_required(login_url="login")
@@ -183,22 +205,20 @@ def vendor_food_details(request, slug):
     return render(request, "vendor/foodDetails.html", context)
 
 
+# Vendor orders
 
-
-# Vendor orders 
 
 @login_required(login_url="login")
 @user_passes_test(check_role_vendor)
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def vendor_orders_all(request):
     vendor = get_object_or_404(Vendor, user=request.user)
-    orders = Order.objects.filter(vendor=vendor).order_by('-created_at')
+    orders = Order.objects.filter(vendor=vendor, is_ordered=True).order_by("-created_at")
     context = {
-        'orders': orders,
-        'VALID_STATUS_TRANSITIONS': VALID_STATUS_TRANSITIONS,
+        "orders": orders,
+        "VALID_STATUS_TRANSITIONS": VALID_STATUS_TRANSITIONS,
     }
     return render(request, "vendor/OrdersAll.html", context)
-
 
 
 @login_required(login_url="login")
@@ -206,22 +226,40 @@ def vendor_orders_all(request):
 @require_POST
 def vendor_update_order_status(request):
     if request.headers.get("x-requested-with") == "XMLHttpRequest":
-        new_status = request.POST.get('status')
-        order_number = request.POST.get('order_number')
+        new_status = request.POST.get("status")
+        order_number = request.POST.get("order_number")
         vendor = get_object_or_404(Vendor, user=request.user)
         order = get_object_or_404(Order, order_number=order_number, vendor=vendor)
 
         if new_status in VALID_STATUS_TRANSITIONS[order.status]:
             order.status = new_status
-            order.save() 
+            order.save()
             print(new_status, order_number)
-            return JsonResponse({
-                'status': 'Success',
-                'message': 'Updated the status successfully',
-                'order_status': order.status,
-            })
+            return JsonResponse(
+                {
+                    "status": "Success",
+                    "message": "Updated the status successfully",
+                    "order_status": order.status,
+                }
+            )
         else:
-            return JsonResponse({
-                'status': 'Failed',
-                'message': 'Invalid status'
-            })
+            return JsonResponse({"status": "Failed", "message": "Invalid status"})
+
+
+
+
+@login_required(login_url="login")
+@user_passes_test(check_role_vendor)
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+def vendor_my_order_details(request, order_number):
+    vendor = get_object_or_404(Vendor, user=request.user)
+    order = get_object_or_404(
+        Order, order_number=order_number, vendor=vendor, is_ordered=True
+    )
+    order_items = OrderedFood.objects.filter(order=order)
+
+    context = {
+        "order": order,
+        "order_items": order_items,
+    }
+    return render(request, "vendor/vendorMyOrderDetails.html", context)

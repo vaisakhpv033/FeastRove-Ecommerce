@@ -6,7 +6,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.cache import cache_control
 from django.views.decorators.http import require_POST
 
-from accounts.utils import send_notification, check_role_customer
+from accounts.utils import check_role_customer, send_notification
 from customers.models import Address
 from feastrove.settings import RZP_KEY_ID, RZP_KEY_SECRET
 from marketplace.context_processors import get_cart_count, get_cart_total
@@ -19,7 +19,7 @@ client = razorpay.Client(auth=(RZP_KEY_ID, RZP_KEY_SECRET))
 
 
 # Create your views here.
-@login_required(login_url='login')
+@login_required(login_url="login")
 @user_passes_test(check_role_customer)
 @require_POST
 @cache_control(no_cache=True, no_store=True, must_revalidate=True)
@@ -81,7 +81,7 @@ def place_order(request):
     return redirect(request, "checkout")
 
 
-@login_required(login_url='login')
+@login_required(login_url="login")
 @user_passes_test(check_role_customer)
 @require_POST
 @cache_control(no_store=True, no_cache=True, must_revalidate=True)
@@ -92,14 +92,15 @@ def payments(request):
         payment_method = request.POST.get("payment_method")
         status = request.POST.get("status")
         razorpay_signature = request.POST.get("razorpay_signature")
-        
-        order_id = request.session.get('rzp_order_id')
+
+        order_id = request.session.get("rzp_order_id")
 
         # verify the payment through signature generation
-        if payment_method == 'Razorpay':
+        if payment_method == "Razorpay":
             if not verify_signature(order_id, transaction_id, razorpay_signature):
-                return JsonResponse({"error": "Payment Verification Failed"}, status=403)
-
+                return JsonResponse(
+                    {"error": "Payment Verification Failed"}, status=403
+                )
 
         if not all([order_number, transaction_id, payment_method, status]):
             return JsonResponse({"error": "Invalid Payment details"}, status=400)
@@ -156,7 +157,7 @@ def payments(request):
         )
         cart_items.delete()
         if order.payment_method == "razorpay":
-            del request.session['rzp_order_id']
+            del request.session["rzp_order_id"]
         response = {
             "message": "Success",
             "order_number": order_number,
@@ -166,7 +167,7 @@ def payments(request):
     return JsonResponse({"status": "Failed", "message": "Invalid Request"})
 
 
-@login_required(login_url='login')
+@login_required(login_url="login")
 @user_passes_test(check_role_customer)
 @require_POST
 @cache_control(no_store=True, no_cache=True, must_revalidate=True)
@@ -225,7 +226,7 @@ def payment_cod(request):
     return JsonResponse({"status": "Failed", "message": "Invalid Request"})
 
 
-@login_required(login_url='login')
+@login_required(login_url="login")
 @user_passes_test(check_role_customer)
 @cache_control(no_store=True, no_cache=True, must_revalidate=True)
 def order_complete(request):

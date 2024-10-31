@@ -43,7 +43,7 @@
                                         <div class="card shadow-sm rounded">
                                             
                                             {% if item.fooditem.is_available %}
-                                            <a href="{% url 'foodItemDetails' item.fooditem.slug %}"><img src="{{ item.fooditem.image.url }}" class="card-img-top" alt="..." style="max-height:200px;" width="200px">
+                                            <a href="{% url 'foodItemDetails' item.fooditem.slug %}"><img src="{{ item.fooditem.image.url }}" class="card-img-top" alt="..." style="height:200px;" width="200px">
                                             <span class="badge bg-success position-absolute top-0 start-0 m-2">Available</span></a>
                                             {% else %}
                                             <img src="{{ item.fooditem.image.url }}" class="card-img-top" alt="..." height="250px" width="200px" style="filter: grayscale(100%);">

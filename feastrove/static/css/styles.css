@@ -145,3 +145,31 @@ orders card hover
     background-color: rgb(226, 227, 229);
     cursor: pointer;
 }
+
+
+
+
+.rating {
+	margin-bottom: 20px;
+	display: flex;
+	flex-direction: row-reverse;
+	justify-content: flex-end;
+}
+
+.rating input {
+	display: none;
+}
+
+.rating label {
+	font-size: 50px;
+	cursor: pointer;
+}
+
+.rating label:hover,
+.rating label:hover ~ label {
+	color: #FFB30E;
+}
+
+.rating input:checked ~ label {
+	color: orange;
+}

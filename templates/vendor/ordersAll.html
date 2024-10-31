@@ -35,7 +35,7 @@
                         <div class="col-12">
                             
                             
-                            <div class="card mb-2 my-orders" data-url="{% url 'customerMyOrderDetails' order.order_number %}">
+                            <div class="card mb-2 my-orders" data-url="{% url 'vendorMyOrderDetails' order.order_number %}">
                                 
                                 <div class="card-body">
                                   <h5 class="card-title">No: {{ order.order_number }}&nbsp&nbsp&nbspDate: {{ order.created_at|date }}</h5>
@@ -78,6 +78,23 @@
 
 {% block extra_js %}
 
+<script>
+    jQuery(document).ready(function(){
+        $('.my-orders').on('click', function(e){
+            e.preventDefault();
+            let url = $(this).attr('data-url');
+            window.location.href = url;
+
+        })
+        // Prevent the card click when interacting with the select or button inside the card
+        $('.input-group select, .input-group .status-button').on('click', function(e) {
+            e.stopPropagation();
+        });
+    })
+</script>
+
 <script src="{% static 'javascript/vendor_extra.js' %}"></script>
+
+
 
 {% endblock %}

@@ -1,17 +1,17 @@
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.db.models import F
+from django.contrib.gis.db.models.functions import Distance
+from django.contrib.gis.geos import GEOSGeometry
+from django.contrib.gis.measure import D  # 'D' is Shortcut for Distance
+from django.db.models import F, Q
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.views.decorators.cache import cache_control
-from django.db.models import Q
-from django.contrib.gis.geos import GEOSGeometry
-from django.contrib.gis.measure import D    # 'D' is Shortcut for Distance
-from django.contrib.gis.db.models.functions import Distance
 
+from accounts.utils import check_role_customer
 from customers.models import Address
 from menu.models import Category, FoodItem
 from vendor.models import Vendor
-from accounts.utils import check_role_customer
 
 from .context_processors import get_cart_count, get_cart_total
 from .models import Cart
@@ -68,7 +68,11 @@ def food_item_details(request, slug):
 @user_passes_test(check_role_customer)
 @cache_control(no_cache=True, no_store=True, must_revalidate=True)
 def cart(request):
-    cart_items = Cart.objects.filter(user=request.user).order_by("-created_at")
+    cart_items = Cart.objects.filter(
+        user=request.user, fooditem__is_available=True
+    ).order_by("-created_at")
+    # remove unavailable items from the cart
+    Cart.objects.filter(user=request.user, fooditem__is_available=False).delete()
     context = {
         "cart_items": cart_items,
     }
@@ -77,10 +81,13 @@ def cart(request):
 
 def add_to_cart(request, slug):
     if request.user.is_authenticated:
-        if request.headers.get("x-requested-with") == "XMLHttpRequest" and request.user.role == 2:
+        if (
+            request.headers.get("x-requested-with") == "XMLHttpRequest"
+            and request.user.role == 2
+        ):
             # Check if the fooditem exists
             try:
-                fooditem = FoodItem.objects.get(slug=slug)
+                fooditem = FoodItem.objects.get(slug=slug, is_available=True)
                 vendor = fooditem.vendor
 
                 cart_items = Cart.objects.filter(user=request.user)
@@ -91,7 +98,6 @@ def add_to_cart(request, slug):
                     # if the vendors are different delete the cart items
                     if current_vendor != vendor:
                         cart_items.delete()
-
 
                 # Try to get the cart item or create it if it doesn't exist
                 cart_item, created = Cart.objects.get_or_create(
@@ -126,7 +132,7 @@ def add_to_cart(request, slug):
 
             except FoodItem.DoesNotExist:
                 return JsonResponse(
-                    {"status": "Failed", "message": "This food doesn't exist"}
+                    {"status": "Failed", "message": "Item Currently Unavailable!"}
                 )
 
             except Exception as e:
@@ -143,7 +149,10 @@ def add_to_cart(request, slug):
 
 def decrease_from_cart(request, slug):
     if request.user.is_authenticated:
-        if request.headers.get("x-requested-with") == "XMLHttpRequest" and request.user.role == 2:
+        if (
+            request.headers.get("x-requested-with") == "XMLHttpRequest"
+            and request.user.role == 2
+        ):
             # Check if the fooditem exists
             try:
                 food_item = FoodItem.objects.get(slug=slug)
@@ -186,7 +195,10 @@ def decrease_from_cart(request, slug):
 
 def remove_cart_item(request, cart_id):
     if request.user.is_authenticated:
-        if request.headers.get("x-requested-with") == "XMLHttpRequest" and request.user.role == 2:
+        if (
+            request.headers.get("x-requested-with") == "XMLHttpRequest"
+            and request.user.role == 2
+        ):
             try:
                 cart_item = Cart.objects.get(user=request.user, id=cart_id)
                 cart_item.delete()
@@ -221,8 +233,11 @@ def remove_cart_item(request, cart_id):
 @cache_control(no_cache=True, no_store=True, must_revalidate=True)
 def checkout(request):
     addresses = Address.objects.filter(user=request.user)
+    # remove unavailable items from the cart
+    Cart.objects.filter(user=request.user, fooditem__is_available=False).delete()
     cart_count = get_cart_count(request)["cart_count"]
     if cart_count <= 0:
+        messages.error(request, "Item Currently Unavailable")
         return redirect("cart")
     context = {
         "addresses": addresses,
@@ -230,43 +245,43 @@ def checkout(request):
     return render(request, "marketplace/checkout.html", context)
 
 
-
 # Search Page
 def search(request):
-    if 'location' not in request.GET or 'radius' not in request.GET:
+    if "location" not in request.GET or "radius" not in request.GET:
         return redirect("home")
-    address = request.GET['location']
-    latitude = request.GET['latitude']
-    longitude = request.GET['longitude']
-    radius = request.GET['radius']
-    keyword = request.GET['rest_food']
-
+    address = request.GET["location"]
+    latitude = request.GET["latitude"]
+    longitude = request.GET["longitude"]
+    radius = request.GET["radius"]
+    keyword = request.GET["rest_food"]
 
     # fetch vendors by food id
-    fetch_vendor_lst = FoodItem.objects.filter(
-        food_title__icontains = keyword, is_available = True
-        ).values_list('vendor', flat=True).distinct()
+    fetch_vendor_lst = (
+        FoodItem.objects.filter(food_title__icontains=keyword, is_available=True)
+        .values_list("vendor", flat=True)
+        .distinct()
+    )
 
     # if lat and lng present query vendors based on the nearest distance from the address provided
     if latitude and longitude:
-        pnt = GEOSGeometry("POINT(%s %s)" %(longitude, latitude))
-        vendors = Vendor.objects.filter(
-            (Q(id__in = fetch_vendor_lst) | Q(vendor_name__icontains = keyword)),
-            is_approved=True, 
-            user__is_active=True,
-            user_profile__location__distance_lte=(pnt, D(km=radius))
-        ).annotate(distance=Distance("user_profile__location", pnt)).order_by("distance")
-        
-    else:
-        vendors = Vendor.objects.filter(
-            (Q(id__in = fetch_vendor_lst) | Q(vendor_name__icontains = keyword)),
-            is_approved=True, 
-            user__is_active=True
+        pnt = GEOSGeometry("POINT(%s %s)" % (longitude, latitude))
+        vendors = (
+            Vendor.objects.filter(
+                (Q(id__in=fetch_vendor_lst) | Q(vendor_name__icontains=keyword)),
+                is_approved=True,
+                user__is_active=True,
+                user_profile__location__distance_lte=(pnt, D(km=radius)),
+            )
+            .annotate(distance=Distance("user_profile__location", pnt))
+            .order_by("distance")
         )
 
+    else:
+        vendors = Vendor.objects.filter(
+            (Q(id__in=fetch_vendor_lst) | Q(vendor_name__icontains=keyword)),
+            is_approved=True,
+            user__is_active=True,
+        )
 
-    context = {
-        'restaurants': vendors,
-        'address': address
-    }
+    context = {"restaurants": vendors, "address": address}
     return render(request, "marketplace/restaurantListing.html", context)

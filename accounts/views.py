@@ -9,7 +9,6 @@ from django.views.decorators.cache import cache_control
 
 from accounts.utils import (
     check_role_customer,
-    check_role_vendor,
     detect_user,
     send_verification_email,
     validate_password,
@@ -19,7 +18,7 @@ from vendor.forms import VendorForm
 from .forms import UserForm
 from .models import User, UserProfile
 from wallets.models import Wallet
-from vendor.models import Vendor
+
 
 
 # Create your views here.
@@ -129,13 +128,6 @@ def my_account(request):
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def customer_dashboard(request):
     return render(request, "accounts/customerDashboard.html")
-
-
-@login_required(login_url="login")
-@user_passes_test(check_role_vendor)
-@cache_control(no_cache=True, must_revalidate=True, no_store=True)
-def vendor_dashboard(request):
-    return render(request, "accounts/vendorDashboard.html")
 
 
 # Forgot password

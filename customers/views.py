@@ -11,12 +11,11 @@ from accounts.forms import UserProfileForm
 from accounts.models import UserProfile
 from accounts.utils import check_role_customer, validate_password
 from menu.models import FoodItem
-
-from .forms import AddressForm
-from .models import Address, Favourites
 from orders.models import Order, OrderedFood
 from wallets.models import Wallet, WalletTransaction
 
+from .forms import AddressForm
+from .models import Address, Favourites
 
 
 @login_required(login_url="login")
@@ -134,6 +133,7 @@ def customer_delete_address(request, address_id):
             )
     return JsonResponse({"status": "Failed", "message": "Invalid request"})
 
+
 @login_required(login_url="login")
 @user_passes_test(check_role_customer)
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
@@ -193,40 +193,42 @@ def customer_remove_fav_item(request, fav_item_id):
         return JsonResponse({"status": "Failed", "message": "Invalid Request"})
 
 
-@login_required(login_url='login')
+@login_required(login_url="login")
 @user_passes_test(check_role_customer)
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def customer_my_orders(request):
-    orders = Order.objects.filter(user=request.user, is_ordered=True).order_by('-created_at')
+    orders = Order.objects.filter(user=request.user, is_ordered=True).order_by(
+        "-created_at"
+    )
 
-    context = {
-        'orders': orders
-    }
+    context = {"orders": orders}
     return render(request, "customer/customerMyOrders.html", context)
 
 
-@login_required(login_url='login')
+@login_required(login_url="login")
 @user_passes_test(check_role_customer)
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def customer_my_order_details(request, order_number):
-    order = get_object_or_404(Order, user=request.user, order_number=order_number, is_ordered=True)
+    order = get_object_or_404(
+        Order, user=request.user, order_number=order_number, is_ordered=True
+    )
     order_items = OrderedFood.objects.filter(user=request.user, order=order)
 
     context = {
-        'order': order,
-        'order_items': order_items,
+        "order": order,
+        "order_items": order_items,
     }
     return render(request, "customer/customerMyOrderDetails.html", context)
 
 
-@login_required(login_url='login')
+@login_required(login_url="login")
 @user_passes_test(check_role_customer)
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def customer_wallet(request):
     wallet = Wallet.objects.get(user=request.user)
     wallet_transactions = WalletTransaction.objects.filter(wallet=wallet)
     context = {
-        'wallet': wallet,
-        'transactions': wallet_transactions,
+        "wallet": wallet,
+        "transactions": wallet_transactions,
     }
     return render(request, "customer/customerMyWallet.html", context)

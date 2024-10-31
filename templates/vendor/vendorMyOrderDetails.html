@@ -16,52 +16,13 @@
         <div class="col-12 col-md-10">
             <div class="bg-success-subtle p-5 pt-2">
                 {% if order.status == 'New' %}
-                <p class="text-info">Your order has been placed and is awaiting vendor acceptance.</p>
+                <p class="text-info">New order received!</p>
                 {% elif order.status == 'Accepted' %}
-                <p class="text-success">Your order has been accepted by the vendor and is being prepared.</p>
+                <p class="text-success">You Accepted the order</p>
 
                 {% elif order.status == 'Completed' %}
                 <div class="d-flex flex-column flex-lg-row align-items-center gap-2">
-                <p class="text-success m-0">Your order has been successfully completed and delivered. Thank you for shopping with us!</p>
-                {% if not order.order_review.rating %}
-                <button type="button" id="modal-button-rating" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-whatever="@getbootstrap">Rate Now</button>
-                {% endif %}
-                </div>
-                <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                    <div class="modal-dialog">
-                      <div class="modal-content">
-                        <div class="modal-header">
-                          <h1 class="modal-title fs-5" id="exampleModalLabel">Rate Your Order</h1>
-                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="mb-3">
-                                <label class="col-form-label">Your Rating:</label>
-                                <div class="rating">
-                                    <!-- Notice that the stars are in reverse order -->
-                                    <input type="radio" id="star5" name="rating" value="5">
-                                    <label for="star5">&#9733;</label>
-                                    <input type="radio" id="star4" name="rating" value="4">
-                                    <label for="star4">&#9733;</label>
-                                    <input type="radio" id="star3" name="rating" value="3">
-                                    <label for="star3">&#9733;</label>
-                                    <input type="radio" id="star2" name="rating" value="2">
-                                    <label for="star2">&#9733;</label>
-                                    <input type="radio" id="star1" name="rating" value="1">
-                                    <label for="star1">&#9733;</label>
-                                </div>
-                            </div>
-                            <div class="mb-3">
-                              <label for="comment-text" class="col-form-label">Comments:</label>
-                              <textarea class="form-control" id="comment-text"></textarea>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                          <button type="button" class="btn btn-secondary" id="modal-close-button" data-bs-dismiss="modal">Close</button>
-                          <button type="button" id="rate-now-button" class="btn btn-primary" disabled>Rate Now</button>
-                        </div>
-                      </div>
-                    </div>
+                <p class="text-success m-0">Order delivered successfully!</p>
                 </div>
                 
                 <div class="rating {% if not order.order_review.rating %}d-none {% endif %} mb-0" id="your-rating">
@@ -79,7 +40,7 @@
                 </div>
 
                 {% elif order.status == 'Cancelled' %}
-                <p class="text-danger">Your order has been cancelled by the vendor. Please contact support for further assistance if needed.</p>
+                <p class="text-danger">You Cancelled this order</p>
 
                 {% endif %}
                 <hr>
@@ -164,82 +125,7 @@
 
 {% endblock %}
 
-
 {% block extra_js %}
-
-<script>
-     // using jQuery
-     function getCookie(name) {
-        var cookieValue = null;
-        if (document.cookie && document.cookie != '') {
-            var cookies = document.cookie.split(';');
-            for (var i = 0; i < cookies.length; i++) {
-                var cookie = jQuery.trim(cookies[i]);
-                // Does this cookie string begin with the name we want?
-                if (cookie.substring(0, name.length + 1) == (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
-
-    var csrftoken = getCookie('csrftoken');
-    let order_number = "{{ order.order_number }}";
-    let url = "{% url 'reviewVendor' %}";
-
-    $(document).ready(function() {
-        // enable the rate now button when rating is clicked
-        $('input[name="rating"]').on('change', function(){
-            $('#rate-now-button').prop('disabled', false);
-        });
-
-        // when the rate now button click sending request to the server
-        $('#rate-now-button').on('click', function(){
-            let rating = $('input[name="rating"]:checked').val();
-            let comment = $('#comment-text').val();
-
-            // Send ajax request to the server
-            $.ajax({
-                type: 'POST',
-                url: url,
-                data: {
-                    'rating': rating,
-                    'comment': comment,
-                    'order_number': order_number,
-                    'csrfmiddlewaretoken': csrftoken
-                },
-                success: function (response) {
-                    if (response.status === 'Success') {
-                        $('#modal-button-rating').remove();
-                        $('#exampleModal').hide();
-                        $('#your-rating').removeClass("d-none");
-                        $('#modal-close-button').click();
-                        $(`#your-rating input[name="rating1"][value='${rating}']`).prop('checked', true);
-                        Swal.fire({
-                            title: "Thank you for your valuable feedback",
-                            icon: "success"
-                        })
-                    }else if (response.status === 'Failed'){
-                        Swal.fire({
-                            title: response.message,
-                            icon: "error"
-                        })
-                    }
-                },
-                error: function () {
-                    Swal.fire({
-                        title: "Something went wrong. Please try again later",
-                        icon: "error"
-                    })
-                }
-            })
-
-
-        })
-    });
-</script>
 {% if order.order_review.rating %}
 
 <script>

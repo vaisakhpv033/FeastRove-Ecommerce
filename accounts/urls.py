@@ -12,7 +12,6 @@ urlpatterns = [
     path("logout/", views.logout, name="logout"),
     path("my-account/", views.my_account, name="myAccount"),
     path("customer/Dashboard/", views.customer_dashboard, name="customerDashboard"),
-    path("vendor/Dashboard/", views.vendor_dashboard, name="vendorDashboard"),
     path("activate/<uidb64>/<token>/", views.activate, name="activate"),
     
     path("forgot-password/", views.forgot_password, name="forgotPassword"),
@@ -21,4 +20,5 @@ urlpatterns = [
 
     path("vendor/", include("vendor.urls")),   
     path("customer/", include("customers.urls")),
+    path("customer/reviews/", include("reviews.urls")),
 ]
