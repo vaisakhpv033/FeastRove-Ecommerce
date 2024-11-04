@@ -55,16 +55,29 @@
                         <h5 class="mb-0">Summary</h5>
                     </div>
                     <div class="card-body">
+                        <div class="input-group">
+                            <input type="text" id="applied_coupon_code" name="applied_coupon" hidden>
+                            <input type="text" class="form-control" placeholder="Coupon code" id="coupon_code" aria-label="Recipient's username" aria-describedby="coupon-btn">
+                            <button class="btn btn-outline-secondary" onclick="applyCoupon()" id="coupon-btn" type="button">Apply</button>
+                        </div>
+                        <label class="d-none" id="coupon-errors"></label>
                         <ul class="list-group list-group-flush">
                             <li
                                 class="list-group-item d-flex justify-content-between align-items-center border-0 px-0 pb-0">
                                 <span>Subtotal</span>
                                 <span id="subtotal">₹{{ subtotal }}</span>
                             </li>
+                           
                             <li class="list-group-item d-flex justify-content-between align-items-center px-0">
                                 <span>Tax</span>
                                 <span id="tax">₹{{ tax }}</span>
                             </li>
+
+                            <li id="discount-block" class="list-group-item d-flex justify-content-between align-items-center border-0 px-0 d-none">
+                                <span>Discount</span>
+                                <span id="discount_amount" class="text-success"></span>
+                            </li>
+                            
                             <li
                                 class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
                                 <div>
@@ -121,6 +134,7 @@
 
 {% block extra_js %}
 <script>
+let applied_coupon
 function payMethodConfirm(){
     let payMethod = $("input[name='payment-method']:checked").val()
     let address = $("input[name='delivery-address']:checked").val()
@@ -144,8 +158,60 @@ function payMethodConfirm(){
         })
         return false
     }
+    $('#applied_coupon_code').val(applied_coupon)
     return true
 }
+
+let url = "{% url 'verifyCoupon' %}";
+let tax = "{{ tax }}";
+let grand_total = "{{ grand_total }}";
+
+function applyCoupon(){
+    let coupon_code = $("#coupon_code").val()
+    if (!coupon_code){
+        return false
+    }else if (coupon_code.length < 6 || coupon_code.length > 10){
+        
+        applied_coupon = null;
+        
+        $("#coupon-errors").text("*Invalid Coupon");
+        $("#coupon-errors").removeClass().addClass("text-danger");
+    }else {
+        $.ajax({
+            type: 'GET',
+            data: {
+                'coupon_code': coupon_code
+            },
+            url: url,
+            success: function (response){
+                
+                if (response.status === 'Success'){
+                    // set global applied_coupon to applied coupon_code
+                    applied_coupon = coupon_code;
+                    
+                    $("#coupon-errors").html(`Coupon ${coupon_code} applied successfully`);
+                    $("#coupon-errors").removeClass().addClass("text-success mt-2 fw-medium");
+                    $('#grand_total').html('₹'+response.discounted_total['discount_grand_total']);
+                    $('#discount-block').removeClass("d-none");
+                    $('#discount_amount').text("- ₹"+response.discounted_total['discount']);
+                }else {
+                    // change global applied_coupon value to null
+                    applied_coupon = null;
+                    $("#coupon-errors").text("*"+ response.message);
+                    $("#coupon-errors").removeClass().addClass("text-danger");
+                    $('#grand_total').html('₹'+grand_total);
+                    $('#discount-block').addClass("d-none");
+                }
+            }
+        })
+       
+    }
+}
+
+
+
+
+
 </script>
 
 {% endblock %}

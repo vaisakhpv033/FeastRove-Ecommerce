@@ -14,6 +14,10 @@ class OrderAdmin(admin.ModelAdmin):
 class PaymentAdmin(admin.ModelAdmin):
     list_display = ['transaction_id', 'payment_method', 'status', 'amount', 'user']
 
+
+class OrderedFoodAdmin(admin.ModelAdmin):
+    list_display = ['order', 'payment', 'user', 'fooditem', 'quantity', 'price']
+
 admin.site.register(Order, OrderAdmin)
-admin.site.register(OrderedFood)
+admin.site.register(OrderedFood, OrderedFoodAdmin)
 admin.site.register(Payment, PaymentAdmin)

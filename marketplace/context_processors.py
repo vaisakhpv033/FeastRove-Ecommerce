@@ -5,6 +5,7 @@ from django.db.models import F, Sum
 from .models import Cart
 
 
+
 def get_cart_count(request):
     cart_count = 0
     if request.user.is_authenticated:
@@ -35,3 +36,4 @@ def get_cart_total(request):
         grand_total = (subtotal + tax).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
     return {"subtotal": subtotal, "tax": tax, "grand_total": grand_total}
+

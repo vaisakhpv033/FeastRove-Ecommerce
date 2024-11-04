@@ -1,6 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.db.models import Q, Count
+from django.db.models import Q, Count, Sum, Avg
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.cache import cache_control
@@ -12,6 +12,7 @@ from accounts.utils import check_role_vendor
 from menu.forms import CategoryForm, FoodItemForm
 from menu.models import Category, FoodItem
 from orders.models import Order, OrderedFood
+from reviews.models import VendorReview
 
 from .forms import VendorForm
 from .models import Vendor
@@ -36,12 +37,29 @@ def vendor_dashboard(request):
         completed_count = Count('id', filter=Q(status='Completed')),
         cancelled_count = Count('id', filter=Q(status='Cancelled'))
     )
-    print(order_summary)
+
+    total_revenue = orders.aggregate(
+        total_sum = Sum('total', filter=Q(status='Completed')),
+        total_tax = Sum('total_tax', filter=Q(status='Completed')),
+        total_cancelled = Sum('total', filter=Q(status='Cancelled'))
+        )
+    rated_orders = VendorReview.objects.filter(order__vendor=vendor, rating__isnull=False)
+
+    average_rating = rated_orders.aggregate(
+        avg_rating = Avg('rating'),
+        rating_count = Count('rating'),
+        one_rating = Count('rating', filter=Q(rating=1)),
+        two_rating = Count('rating', filter=Q(rating=2)),
+        three_rating = Count('rating', filter=Q(rating=3)),
+        four_rating = Count('rating', filter=Q(rating=4)),
+        five_rating = Count('rating', filter=Q(rating=5))
+    )
+
     context = {
         'order': orders,
-        'total_order_count': order_summary['total_order_count'],
-        'completed_count': order_summary['completed_count'],
-        'cancelled_count': order_summary['cancelled_count']
+        'order_summary': order_summary,
+        'total_revenue': total_revenue,
+        'average_rating': average_rating,
     }
     return render(request, "accounts/vendorDashboard.html", context)
 

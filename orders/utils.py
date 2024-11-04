@@ -17,8 +17,10 @@ def generate_order_number(pk):
     return order_number
 
 
-def save_order_details(request, address, cart_totals):
+
+def save_order_details(request, address, cart_totals, coupon=None):
     if request.method == "POST":
+        print("save order started")
         payment_method = request.POST.get("payment-method")
         if not payment_method:
             return HttpResponseBadRequest("payment method is required")
@@ -36,7 +38,13 @@ def save_order_details(request, address, cart_totals):
             total_tax=cart_totals["tax"],
             payment_method=payment_method,
         )
-        order.save()
+        print("order created")
+        print("order.id",order.id)
+        order.save() 
+        print("order saved", coupon)
+        if coupon and payment_method != "cod":
+            order.apply_coupon(request.user, coupon)
+            order.coupon=coupon
         order.order_number = generate_order_number(order.id)
         order.save()
         return order

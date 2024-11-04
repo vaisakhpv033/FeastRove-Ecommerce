@@ -237,7 +237,7 @@ def checkout(request):
     Cart.objects.filter(user=request.user, fooditem__is_available=False).delete()
     cart_count = get_cart_count(request)["cart_count"]
     if cart_count <= 0:
-        messages.error(request, "Item Currently Unavailable")
+        messages.error(request, "Cart is Empty")
         return redirect("cart")
     context = {
         "addresses": addresses,

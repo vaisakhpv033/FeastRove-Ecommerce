@@ -14,6 +14,7 @@ from marketplace.models import Cart
 
 from .models import Order, OrderedFood, Payment
 from .utils import inr_to_usd, save_order_details, verify_signature
+from coupons_offers.models import Coupons
 
 client = razorpay.Client(auth=(RZP_KEY_ID, RZP_KEY_SECRET))
 
@@ -27,14 +28,30 @@ def place_order(request):
     address = get_object_or_404(
         Address, user=request.user, pk=request.POST["delivery-address"]
     )
+    coupon_code = request.POST["applied_coupon"]
+    coupon = None
+    if coupon_code:
+        coupon = Coupons.objects.get(code=coupon_code)
     cart_count = get_cart_count(request)["cart_count"]
     cart_totals = get_cart_total(request)
     if cart_count <= 0:
         return redirect("home")
 
-    order = save_order_details(request, address=address, cart_totals=cart_totals)
+    order = save_order_details(request, address=address, cart_totals=cart_totals, coupon=coupon)
     if order:
         cart_items = Cart.objects.filter(user=request.user).order_by("-created_at")
+
+       
+        for item in cart_items:
+            ordered_food = OrderedFood(
+                order=order,
+                
+                user=request.user,
+                fooditem=item.fooditem,
+                quantity=item.quantity,
+                price=item.fooditem.price,
+            )
+            ordered_food.save()
 
         # assigning vendor to the order
         order.vendor = cart_items[0].fooditem.vendor
@@ -42,7 +59,7 @@ def place_order(request):
 
         # Razorpay
         if order.payment_method == "razorpay":
-            amount = int(cart_totals["grand_total"] * 100)
+            amount = int(order.total_amount * 100)
             data = {
                 "amount": amount,
                 "currency": "INR",
@@ -51,7 +68,7 @@ def place_order(request):
             payment = client.order.create(data=data)
             rzp_order_id = payment["id"]
 
-            request.session["rzp_order_id"] = rzp_order_id
+            request.session[order.order_number] = rzp_order_id
 
             context = {
                 "cart_items": cart_items,
@@ -62,7 +79,7 @@ def place_order(request):
                 "amount": amount,
             }
         elif order.payment_method == "paypal":
-            usd_amount = inr_to_usd(cart_totals["grand_total"])
+            usd_amount = inr_to_usd(order.total_amount)
             context = {
                 "cart_items": cart_items,
                 "order": order,
@@ -93,7 +110,7 @@ def payments(request):
         status = request.POST.get("status")
         razorpay_signature = request.POST.get("razorpay_signature")
 
-        order_id = request.session.get("rzp_order_id")
+        order_id = request.session.get(order_number)
 
         # verify the payment through signature generation
         if payment_method == "Razorpay":
@@ -123,18 +140,13 @@ def payments(request):
         order.is_ordered = True
         order.save()
 
-        # move the cart items to ordered food items
+        OrderedFood.objects.filter(order=order).update(payment=payment)
+
         cart_items = Cart.objects.filter(user=request.user)
-        for item in cart_items:
-            ordered_food = OrderedFood(
-                order=order,
-                payment=payment,
-                user=request.user,
-                fooditem=item.fooditem,
-                quantity=item.quantity,
-                price=item.fooditem.price,
-            )
-            ordered_food.save()
+        cart_items.delete()
+
+        if order.payment_method == "razorpay":
+            del request.session[order_number]
 
         # Send order confirmation email to the customer
         email_subject = "Your Order Placed Successfully"
@@ -147,17 +159,15 @@ def payments(request):
         # Send order receive email to the vendor
         email_subject = "A new order has been got"
         email_template = "orders/new_order_received_email.html"
-        to_emails = set(item.fooditem.vendor.user.email for item in cart_items)
+        to_emails = [order.vendor.user.email]
         context = {"user": request.user, "order": order, "to_emails": to_emails}
         send_notification(
             email_subject=email_subject,
             email_template=email_template,
             context=context,
-            to_email=list(to_emails),
+            to_email=to_emails,
         )
-        cart_items.delete()
-        if order.payment_method == "razorpay":
-            del request.session["rzp_order_id"]
+        
         response = {
             "message": "Success",
             "order_number": order_number,
