@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Invoice</title>
+    <style>
+        /* Container and layout styling */
+        .container {
+            background-color: #d1e7dd; /* bg-success-subtle equivalent */
+            padding: 30px;
+            font-family: Arial, sans-serif;
+            color: #212529;
+        }
+        .header, .summary, .footer {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .details-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+        }
+        .card {
+            background-color: #d1e7dd;
+            border: none;
+            margin-bottom: 20px;
+        }
+        .card-body {
+            padding: 10px;
+        }
+        .text-capitalize { text-transform: capitalize; }
+        .fw-medium { font-weight: 500; }
+        .fw-bold { font-weight: bold; }
+
+        /* Image styles */
+        img { max-width: 100px; padding: 5px; height: auto; }
+
+        /* Summary section */
+        .summary {
+            text-align: right;
+            width: 50%;
+            margin-left: auto;
+        }
+        .summary div {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        /* Responsive design for smaller screens */
+        @media (max-width: 768px) {
+            .details-row, .summary {
+                flex-direction: column;
+            }
+            .summary {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h4>Thank you for your order</h4>
+            <span>Review your order details</span>
+        </div>
+
+        <div class="details-row">
+            <div>Order Date: <span class="fw-medium">{{ order.created_at }}</span></div>
+            <div>Order No: <span class="fw-medium">{{ order.order_number }}</span></div>
+            <div>Payment Method: <span class="fw-medium text-capitalize">{{ order.payment_method }}</span></div>
+            <div>Transaction ID: <span class="fw-medium">{{ order.payment.transaction_id }}</span></div>
+        </div>
+
+        <div class="card">
+            <h6>Delivery Address:</h6>
+            <div class="card-body">
+                <p>{{ order.address }}, {{ address.road_name }}, {% if address.landmark %}{{ address.landmark }}{% endif %}</p>
+                <p>Mobile Number: {{ order.phone_number }} | State: {{ order.state }} | City: {{ order.city }}</p>
+                <p>Pincode: {{ order.pincode }}</p>
+            </div>
+        </div>
+
+        <h6>Ordered Items:</h6>
+        {% for item in ordered_food %}
+        <div class="card">
+            <div class="card-body">
+                <div class="details-row">
+                    <h6 class="fw-medium">{{ item.fooditem.food_title }}</h6>
+                    <h6 class="fw-medium">₹{{ item.total_amount }}</h6>
+                </div>
+                <p>{{ item.fooditem.vendor.vendor_name }}</p>
+                <div class="details-row">
+                    <p>Price: ₹{{ item.price }}</p>
+                    <p>Quantity: {{ item.quantity }}</p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+        {% if order.payment.status == 'COMPLETED' %}
+            <img src="{% static 'images/payment-logo/paid.png' %}" alt="Paid">
+        {% endif %}
+
+        <div class="summary">
+            <h6>Summary</h6>
+            <div><span>Subtotal:</span><span class="fw-medium">₹{{ order.total }}</span></div>
+            <div><span>Tax:</span><span class="fw-medium">₹{{ order.total_tax }}</span></div>
+            {% if order.discount_amount %}
+            <div><span>Discount:</span><span class="fw-medium">- ₹{{ order.discount_amount }}</span></div>
+            {% endif %}
+            <hr>
+            <div><span>Total:</span><span class="fw-bold">₹{{ order.total_amount }}</span></div>
+        </div>
+    </div>
+</body>
+</html>

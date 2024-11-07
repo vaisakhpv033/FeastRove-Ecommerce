@@ -3,6 +3,10 @@
 
 {% block extra_head %}
 	{% include 'includes/extraStyles.html' %}
+
+
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" />
+	<link rel="stylesheet" href="https://cdn.datatables.net/2.1.8/css/dataTables.bootstrap5.css"/>
 {% endblock %}
 
 {% block navbar %}
@@ -29,28 +33,62 @@
 						</div>
 					<div class="row">
 						<div class="col-12">
-							<div class="user-dashboard loader-holder me-0 ms-0 ps-5 w-100">
+							<div class="user-dashboard loader-holder me-0 ms-0 ps-0 pe-0 w-100">
 								<div class="user-holder">
 									<h5 class="text-uppercase">Overview</h5>
-									<div class="row">
-										<div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
-											<div class="card">
-												<div class = "card-header">
-													Total Orders
+									<div class="row gap-2">
+										<div class="col-lg-4 col-md-5 col-sm-12 col-xs-12">
+											<div class="card" style="min-height: 100%">
+												<div class = "card-header fw-medium d-flex justify-content-between">
+
+													<div>Total Orders: <span class="card-title fw-bold" id="total-orders-count">{{ order_summary.total_order_count }}</span></div>
+													<div class="btn-group">
+														<button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+														  Filter
+														</button>
+														<ul class="dropdown-menu">
+														  <li><button class="dropdown-item" id="all-time-orders">All Time</button></li>
+														  <li><button class="dropdown-item" id="year-orders">This Year</button></li>
+														  <li><button class="dropdown-item" id="month-orders">This Month</button></li>
+														</ul>
+													</div>
 												</div>
-												<div class="card-body text-center">
-													<a class="text-decoration-none" href="#"> <h5 class="card-title text-center">{{ order_summary.total_order_count }}</h5></a>
+												<div class="card-body d-flex flex-column justify-content-center align-items-center" height="250px">
+													<div>
+														<canvas id="myChart"></canvas>
+													  </div>
+													  
 												</div>
 											</div>
 										</div>
 
-										<div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
-											<div class="card">
-												<div class = "card-header">
-													Total Revenue
+										<div class="col-lg-8 col-md-7 col-sm-12 col-xs-12">
+											<div class="card" style="min-height: 100%;">
+												<div class = "card-header fw-medium d-flex  justify-content-between">
+													<div>Total Revenue: <span class="card-title fw-bold" id="total-revenue">₹{{ total_revenue.total_sum }}</span></div>
+													<div class="btn-group">
+														<button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+															Chart
+														</button>
+														<ul class="dropdown-menu">
+														  
+															<li><button class="dropdown-item" id="showBar">Bar Chart</button></li>
+															<li><button class="dropdown-item" id="showLine">Line Chart</button></li>
+														  </ul>
+														<button class="ms-2 btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+														  Filter
+														</button>
+														<ul class="dropdown-menu">
+														  
+														  <li><button class="dropdown-item" id="showDaily">Last 30 Days</button></li>
+														  <li><button class="dropdown-item" id="showMonthly">Monthly</button></li>
+														</ul>
+													</div>
 												</div>
 												<div class="card-body text-center">
-													<a class="text-decoration-none" href="#"> <h5 class="card-title text-center">₹{{ total_revenue.total_sum }}</h5></a>
+													<div>
+														<canvas id="my-revenue-chart"></canvas>
+													</div>
 												</div>
 											</div>
 										</div>
@@ -69,26 +107,8 @@
 
 									<br>
 									<br>
-									<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-										<div class="row">
-											<div class="element-title has-border right-filters-row">
-												<h5>Recent Orders</h5>
-												<div class="right-filters row pull-right">
-													<div class="col-lg-6 col-md-6 col-xs-6">
-														<div class="input-field">
-															<select class="chosen-select-no-single">
-																<option selected="selected" value="">Select Orders Status</option>
-																<option value="Processing">Processing</option>
-																<option value="Cancelled">Cancelled</option>
-																<option value="Completed">Completed</option>
-															</select>
-														</div>
-													</div>
-													
-												</div>
-											</div>
-										</div>
-									</div>
+
+								
 									
 									
 								</div>
@@ -98,13 +118,277 @@
 				</div>
 			</div>
 		</div>
+
+		<section>
+			
+			<div class="container p-0">
+				<hr>
+				<div class="col-12">
+					
+					<div class="row p-2">
+						<h5 class="p-0 m-0">Orders History</h5>
+					</div>
+
+					<div class="row mt-2">
+						<table id="myTable" class="table table-striped table-hover" style="width:100%;">
+
+							<thead class="table-secondary">
+								<tr>
+								  
+									<th class="text-start" scope="col">Order No</th>
+									<th scope="col">Date</th>
+								  	<th scope="col">Customer</th>
+								  	<th scope="col">Payment method</th>
+								  	<th scope="col">Status</th>
+								  	<th scope="col">Subtotal</th>
+								  	<th scope="col">Tax</th>
+								  	<th scope="col">Total</th>
+								</tr>
+							  </thead>
+							  <tbody>
+								{% for order in orders %}
+								<tr>
+									
+									<td class="text-start">{{ order.order_number }}</td>
+									<td>{{ order.created_at|date:"M-d-Y" }}</td>
+									<td>{{ order.email }}</td>
+									<td>{{ order.payment_method }}</td>
+									<td>{{ order.status }}</td>
+									<td>₹{{ order.total }}</td>
+									<td>₹{{ order.total_tax }}</td>
+									<td>₹{{ order.vendor_total_amount }}</td>
+								</tr>
+								{% endfor %}
+								
+							  </tbody>
+			
+						</table>
+					</div>
+				</div>
+			</div>
+		</section>
 		<!-- Main Section End -->
 
 {% endblock %}
 
 
 {% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+	const ctx = document.getElementById('myChart');
+	let completedCount = {{ order_summary.completed_count }};
+	let cancelledCount = {{ order_summary.cancelled_count }};
+	let orderSummaryUrl = "{% url 'vendorOrderSummary' %}";
+	let orderRevenueUrl = "{% url 'vendorOrderRevenue' %}";
+	
+	
+	// pie chart
+	const pieChart = new Chart(ctx, {
+	  type: 'pie',
+	  data: {
+		labels: ['Completed', 'Cancelled'],
+		datasets: [{
+		  label: 'Number of orders',
+		  data: [ completedCount, cancelledCount],
+		  borderWidth: 1,
+		  backgroundColor: [
+		  'rgb(34,187,51)',
+		  'rgb(187,33,36)',
+		  'rgb(255, 205, 86)'
+		],
+		cutout: '50%',
+		radius: '90%',
+		hoverOffset: 10,
+		  
+		}]
+	  },
+	 
+	
+	});
+
+
+	// bar chart
+	// process the response data and prepare it for the chart
+	function processRevenueData(last_30days, last_12months, daily_revenue, monthly_revenue) {
+		const dailyRevenueMap = {};
+		daily_revenue.forEach(item => {
+			const dayKey = `${String(item.day).padStart(2, '0')}-${String(item.month).padStart(2, '0')}`;
+			dailyRevenueMap[dayKey] = parseFloat(item.total_revenue);
+		});
+
+		const monthlyRevenueMap = {};
+		monthly_revenue.forEach(item => {
+			const monthKey = `${String(item.month).padStart(2, '0')}-${item.year}`;
+			monthlyRevenueMap[monthKey] = parseFloat(item.total_revenue);
+		})
+
+		const dailyLabels = last_30days;
+		const dailyData = dailyLabels.map(day => dailyRevenueMap[day] || 0);
+
+		const monthlyLabels = last_12months.map(([month, year]) => `${String(month).padStart(2, '0')}-${year}`);
+		const monthlyData = monthlyLabels.map(month => monthlyRevenueMap[month] || 0);
+
+		return {dailyLabels, dailyData, monthlyLabels, monthlyData};
+	}
+	
+	$.ajax({
+		type: 'GET',
+		url: orderRevenueUrl,
+		success: function(response){
+			console.log(response);
+
+			const { dailyLabels, dailyData, monthlyLabels, monthlyData } = processRevenueData(
+				response.last_30days,
+				response.last_12months,
+				response.daily_revenue,
+				response.monthly_revenue
+			);
+
+
+			const revenueChartElement = document.getElementById('my-revenue-chart');
+			let revenueChart;
+			let chartType = 'bar';
+
+			// function to initialize or recreate the chart
+			function createChart(labels=dailyLabels, data=dailyData, labelText='Total Revenue (Daily)'){
+				if (revenueChart) {
+					revenueChart.destroy();
+				}
+
+				const revenueData = {
+					labels: labels,
+					datasets: [{
+						label: labelText,
+						data: data,
+						backgroundColor: [
+							'rgba(255, 99, 132, 0.2)',
+							'rgba(75, 192, 192, 0.2)',
+						],
+						borderColor: [
+							'rgba(255, 99, 132, 1)',
+							'rgba(75, 192, 192, 1)',
+						],
+						borderWidth: 1
+					}]
+				};
+
+				const config = {
+					type: chartType,
+					data: revenueData,
+					options: {
+						scales: {
+							y: {
+								beginAtZero: true
+							}
+						}
+					}
+				};
+
+				revenueChart = new Chart(revenueChartElement, config);
+			}
+
+			createChart();
+
+			function showDailyData() {
+				createChart(dailyLabels, dailyData, 'Total Revenue (Daily)');
+			
+			}
+
+			function showMonthlyData() {
+				createChart(monthlyLabels, monthlyData, 'Total Revenue (Monthly)')
+				
+			}
+
+			function showBarChart() {
+				chartType = 'bar';
+				createChart(revenueChart.data.labels, revenueChart.data.datasets[0].data, revenueChart.data.datasets[0].label);
+			}
+
+			function showLineChart() {
+				chartType = 'line';
+				createChart(revenueChart.data.labels, revenueChart.data.datasets[0].data, revenueChart.data.datasets[0].label)
+			}
+
+
+			document.getElementById('showDaily').addEventListener('click', showDailyData);
+			document.getElementById('showMonthly').addEventListener('click', showMonthlyData);
+
+			document.getElementById('showBar').addEventListener('click', showBarChart);
+			document.getElementById('showLine').addEventListener('click', showLineChart);
+
+		}
+	})
+
+
+	function updateChart(newCompletedCount, newCancelledCount){
+		pieChart.data.datasets[0].data = [newCompletedCount, newCancelledCount];
+		pieChart.update();
+	}
+
+	$(document).ready(function(){
+		
+		new DataTable('#myTable');
+		
+		const months = [
+			'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+			'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+		];
+
+		// when all time orders clicked
+		$('#all-time-orders').on('click', function(e) {
+			e.preventDefault();
+			$.ajax({
+				type: 'GET',
+				url: orderSummaryUrl,
+				success: function(response){
+					if (response.status == 'Success'){
+						updateChart(response.data.completed_count, response.data.cancelled_count);
+						$('#total-orders-count').html(`${response.data.total_order_count}&nbsp&nbsp&nbsp&nbsp <span class="badge text-bg-secondary">All orders</span>`)
+					}
+				}
+			})
+			
+			
+		})
+
+		// when yearly orders clicked
+		$('#year-orders').on('click', function(e) {
+			e.preventDefault();
+			$.ajax({
+				type:'GET',
+				url: orderSummaryUrl,
+				data: {'filter_type': "year"},
+				success: function(response){
+					if (response.status == 'Success'){
+						updateChart(response.data.completed_count, response.data.cancelled_count)
+						$('#total-orders-count').html(`${response.data.total_order_count}&nbsp&nbsp&nbsp&nbsp <span class="badge text-bg-secondary">${response.data.filter_info.filter_year}</span>`)
+						
+					}
+				}
+			})
+			
+		})
+
+		$('#month-orders').on('click', function(e) {
+			e.preventDefault();
+			$.ajax({
+				type: 'GET',
+				url: orderSummaryUrl,
+				data: {'filter_type': "month"},
+				success: function(response){
+					if (response.status == 'Success'){
+						updateChart(response.data.completed_count, response.data.cancelled_count);
+						$('#total-orders-count').html(`${response.data.total_order_count}&nbsp&nbsp&nbsp&nbsp <span class="badge text-bg-secondary">${months[response.data.filter_info.filter_month-1]}-${response.data.filter_info.filter_year}</span>`)
+						
+					}
+				}
+			})
+		})
+	})
+  </script>
    
-{% include 'includes/extrajs.html' %}
+<script src="https://cdn.datatables.net/2.1.8/js/dataTables.js"></script>
+<script src="https://cdn.datatables.net/2.1.8/js/dataTables.bootstrap5.js"></script>
    
 {% endblock %}

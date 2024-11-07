@@ -24,4 +24,7 @@ urlpatterns = [
     path("orders/all/", views.vendor_orders_all, name="vendorOrdersAll"),
     path("orders/update-status/", views.vendor_update_order_status, name="vendorUpdateStatus"),
     path("orders/<str:order_number>/details/", views.vendor_my_order_details, name="vendorMyOrderDetails"),
+
+    path("dashboard/vendor/order-summary/", views.get_vendor_order_summary, name="vendorOrderSummary"),
+    path("dashboard/vendor/order-revenue/", views.get_vendor_order_revenue, name="vendorOrderRevenue"),
 ]

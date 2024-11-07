@@ -5,6 +5,7 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.cache import cache_control
 from django.views.decorators.http import require_POST
+from django.utils.timezone import make_aware
 
 from accounts.forms import UserProfileForm
 from accounts.models import UserProfile
@@ -16,6 +17,8 @@ from reviews.models import VendorReview
 
 from .forms import VendorForm
 from .models import Vendor
+from .utils import vendor_order_summary, vendor_total_revenue, get_vendor_review
+from datetime import datetime
 
 VALID_STATUS_TRANSITIONS = {
     "New": ["Accepted", "Cancelled"],
@@ -32,37 +35,44 @@ def vendor_dashboard(request):
     vendor = get_object_or_404(Vendor, user=request.user)
     orders = Order.objects.filter(vendor=vendor, is_ordered=True).order_by('-created_at')
 
-    order_summary = orders.aggregate(
-        total_order_count = Count('id'),
-        completed_count = Count('id', filter=Q(status='Completed')),
-        cancelled_count = Count('id', filter=Q(status='Cancelled'))
-    )
+    order_summary = vendor_order_summary(vendor)
 
     total_revenue = orders.aggregate(
         total_sum = Sum('total', filter=Q(status='Completed')),
         total_tax = Sum('total_tax', filter=Q(status='Completed')),
         total_cancelled = Sum('total', filter=Q(status='Cancelled'))
         )
-    rated_orders = VendorReview.objects.filter(order__vendor=vendor, rating__isnull=False)
-
-    average_rating = rated_orders.aggregate(
-        avg_rating = Avg('rating'),
-        rating_count = Count('rating'),
-        one_rating = Count('rating', filter=Q(rating=1)),
-        two_rating = Count('rating', filter=Q(rating=2)),
-        three_rating = Count('rating', filter=Q(rating=3)),
-        four_rating = Count('rating', filter=Q(rating=4)),
-        five_rating = Count('rating', filter=Q(rating=5))
-    )
+    
+    average_rating = get_vendor_review(vendor)
+    
 
     context = {
-        'order': orders,
+        'orders': orders,
         'order_summary': order_summary,
         'total_revenue': total_revenue,
         'average_rating': average_rating,
     }
     return render(request, "accounts/vendorDashboard.html", context)
 
+@login_required(login_url='login')
+@user_passes_test(check_role_vendor)
+def get_vendor_order_summary(request):
+    if request.headers.get("x-requested-with") == 'XMLHttpRequest':
+        vendor = get_object_or_404(Vendor, user=request.user)
+        filter_type = request.GET.get('filter_type', None)
+        order_summary = vendor_order_summary(vendor, filter_type=filter_type)
+        return JsonResponse({'status': "Success", 'data': order_summary})
+    else:
+        return JsonResponse({'status': "Failed", 'message': "Invalid Request"}, status=400)
+
+
+def get_vendor_order_revenue(request):
+    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+        vendor = get_object_or_404(Vendor, user=request.user)
+        daily_revenue, monthly_revenue, last_12months, last_30days = vendor_total_revenue(vendor)
+        return JsonResponse({'status': "success", 'daily_revenue': daily_revenue, 'last_30days': last_30days, 'monthly_revenue': monthly_revenue, 'last_12months': last_12months}, status=200)
+    else:
+        return JsonResponse({'status': "Failed", 'message': "Invalid request"}, status=400)
 
 # Create your views here.
 @login_required(login_url="login")
