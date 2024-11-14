@@ -9,12 +9,22 @@ from django.views.generic.detail import DetailView
 from django.utils.decorators import method_decorator
 from accounts.models import User
 from vendor.models import Vendor
+from orders.models import Order
+from .utils import customer_count, top_10_products
 
 # Create your views here.
 @user_passes_test(lambda u: u.is_superadmin, login_url="login")
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def admin_dashboard(request):
-    return render(request, "admin_dashboard/adminDashboard.html")
+    orders = Order.objects.filter(is_ordered=True).order_by('created_at')
+    customer_data = customer_count()
+    top_products = top_10_products()
+    context = {
+        'orders': orders,
+        'customer_data': customer_data,
+        'top_products': top_products
+    }
+    return render(request, "admin_dashboard/adminDashboard.html", context)
 
 
 
@@ -100,3 +110,6 @@ def disapprove_vendor(request, slug):
     vendor.save()
     messages.success(request, f"{vendor.vendor_name} has been disapproved.")
     return redirect(reverse('adminVendorDetails', kwargs={'slug': slug}))
+
+
+

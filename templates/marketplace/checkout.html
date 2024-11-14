@@ -105,12 +105,14 @@
                                     </label>
                                 </div>
 
+                                {% if grand_total <= 1000.0 %}
                                 <div class="form-check payment-option">
                                     <input class="form-check-input" type="radio" name="payment-method" id="cod" value="cod" hidden>
                                     <label class="form-check-label" for="cod">
                                         <p class="m-0">Cash on Delivery</p>
                                     </label>
                                 </div>
+                                {% endif %}
                             </li>
                             
 

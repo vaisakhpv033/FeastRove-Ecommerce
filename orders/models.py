@@ -110,7 +110,7 @@ class Order(models.Model):
 
 
 class OrderedFood(models.Model):
-    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="order_foods")
     payment = models.ForeignKey(Payment, on_delete=models.SET_NULL, blank=True, null=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     fooditem = models.ForeignKey(FoodItem, on_delete=models.PROTECT)

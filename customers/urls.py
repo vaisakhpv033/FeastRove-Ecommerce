@@ -19,6 +19,7 @@ urlpatterns = [
 
     path("my-orders/", views.customer_my_orders, name="customerMyOrders"),
     path("my-orders/<str:order_number>/details/", views.customer_my_order_details, name="customerMyOrderDetails"),
+    path("my-orders/<str:order_number>/invoice/download/", views.customer_invoice_download, name="customerInvoiceDownload"),
 
     path("my-wallet/", views.customer_wallet, name="customerMyWallet"),
 ]

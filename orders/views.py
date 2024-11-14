@@ -195,18 +195,8 @@ def payment_cod(request):
         # update order status
         order.is_ordered = True
         order.save()
-
-        # move the cart items to ordered food items
         cart_items = Cart.objects.filter(user=request.user)
-        for item in cart_items:
-            ordered_food = OrderedFood(
-                order=order,
-                user=request.user,
-                fooditem=item.fooditem,
-                quantity=item.quantity,
-                price=item.fooditem.price,
-            )
-            ordered_food.save()
+        cart_items.delete()
 
         # Send order confirmation email to the customer
         email_subject = "Your Order Placed Successfully"
@@ -219,7 +209,7 @@ def payment_cod(request):
         # Send order receive email to the vendor
         email_subject = "A new order has been got"
         email_template = "orders/new_order_received_email.html"
-        to_emails = set(item.fooditem.vendor.user.email for item in cart_items)
+        to_emails = [order.vendor.user.email]
         context = {"user": request.user, "order": order, "to_emails": to_emails}
         send_notification(
             email_subject=email_subject,
@@ -227,7 +217,7 @@ def payment_cod(request):
             context=context,
             to_email=list(to_emails),
         )
-        cart_items.delete()
+       
         response = {
             "message": "Success",
             "order_number": order_number,

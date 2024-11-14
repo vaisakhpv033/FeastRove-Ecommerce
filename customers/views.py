@@ -3,9 +3,11 @@ from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.exceptions import ValidationError
 from django.db.utils import IntegrityError
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.cache import cache_control
+from django.template.loader import render_to_string
+from django.templatetags.static import static
 
 from accounts.forms import UserProfileForm
 from accounts.models import UserProfile
@@ -13,6 +15,7 @@ from accounts.utils import check_role_customer, validate_password
 from menu.models import FoodItem
 from orders.models import Order, OrderedFood
 from wallets.models import Wallet, WalletTransaction
+import pdfkit
 
 from .forms import AddressForm
 from .models import Address, Favourites
@@ -232,3 +235,29 @@ def customer_wallet(request):
         "transactions": wallet_transactions,
     }
     return render(request, "customer/customerMyWallet.html", context)
+
+
+
+def customer_invoice_download(request, order_number):
+    order = get_object_or_404(
+        Order, user=request.user, order_number=order_number, is_ordered=True
+    )
+    ordered_food = order.order_foods.all()
+    print(ordered_food)
+
+    context = {'order': order, 'ordered_food': ordered_food, 'paid_image_url': request.build_absolute_uri(static('images/payment-logo/paid.png')), }
+    html_content = render_to_string('customer/pdf/invoice.html', context)
+
+    options = {
+        'page-size': 'A4',
+        'encoding': "UTF-8",
+        'no-outline': None,
+    }
+
+    pdf = pdfkit.from_string(html_content, False, options=options)
+
+
+    response = HttpResponse(pdf, content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="invoice_{order.order_number}.pdf"'
+
+    return response

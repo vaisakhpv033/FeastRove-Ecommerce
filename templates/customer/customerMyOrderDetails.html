@@ -7,10 +7,11 @@
 <div class="container mt-5 mb-5">
     <div class="justify-content-center row">
         <div class="col-12 col-md-10">
-            <div class="bg-dark p-3 px-5">
+            <div class="bg-dark p-3 px-5 d-flex justify-content-between align-items-center">
             <img src="{% static 'images/svg-icons/logo.svg' %}" alt="feastrove Logo" width="240">
-            <p class="text-center float-end">
-            <span class="badge rounded-pill text-bg-{% if order.status == 'New' %}info{% elif order.status == 'Accepted' or order.status == 'Completed' %}success{% else %}danger{% endif %} fs-6">{{ order.status }}</span></p>
+            <div class="text-center float-end d-flex justify-content-center gap-2">
+                <a class="btn btn-sm btn-info py-1" href="{% url 'customerInvoiceDownload' order.order_number %}">Download</a>
+            <span class="badge rounded-pill text-bg-{% if order.status == 'New' %}info{% elif order.status == 'Accepted' or order.status == 'Completed' %}success{% else %}danger{% endif %} fs-6">{{ order.status }}</span></div>
             </div>
         </div>
         <div class="col-12 col-md-10">

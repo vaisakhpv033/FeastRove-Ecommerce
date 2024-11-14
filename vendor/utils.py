@@ -17,7 +17,7 @@ def vendor_order_summary(
     start_date: Optional[datetime] = None,
     end_date: Optional[datetime] = None,
     filter_type: Optional[str] = None,
-) -> Dict[str, Union[int, Dict[str, int]]]:
+) -> Dict[str, int | Dict[str, int]]:
     """
     Fetches and aggregates order statistics for a given vendor within a specified date range.
 

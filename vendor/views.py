@@ -1,11 +1,10 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.db.models import Q, Count, Sum, Avg
+from django.db.models import Q, Sum
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.cache import cache_control
 from django.views.decorators.http import require_POST
-from django.utils.timezone import make_aware
 
 from accounts.forms import UserProfileForm
 from accounts.models import UserProfile
@@ -13,12 +12,10 @@ from accounts.utils import check_role_vendor
 from menu.forms import CategoryForm, FoodItemForm
 from menu.models import Category, FoodItem
 from orders.models import Order, OrderedFood
-from reviews.models import VendorReview
 
 from .forms import VendorForm
 from .models import Vendor
-from .utils import vendor_order_summary, vendor_total_revenue, get_vendor_review
-from datetime import datetime
+from .utils import get_vendor_review, vendor_order_summary, vendor_total_revenue
 
 VALID_STATUS_TRANSITIONS = {
     "New": ["Accepted", "Cancelled"],
@@ -33,46 +30,64 @@ VALID_STATUS_TRANSITIONS = {
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def vendor_dashboard(request):
     vendor = get_object_or_404(Vendor, user=request.user)
-    orders = Order.objects.filter(vendor=vendor, is_ordered=True).order_by('-created_at')
+    orders = Order.objects.filter(vendor=vendor, is_ordered=True).order_by(
+        "-created_at"
+    )
 
     order_summary = vendor_order_summary(vendor)
 
     total_revenue = orders.aggregate(
-        total_sum = Sum('total', filter=Q(status='Completed')),
-        total_tax = Sum('total_tax', filter=Q(status='Completed')),
-        total_cancelled = Sum('total', filter=Q(status='Cancelled'))
-        )
-    
+        total_sum=Sum("total", filter=Q(status="Completed")),
+        total_tax=Sum("total_tax", filter=Q(status="Completed")),
+        total_cancelled=Sum("total", filter=Q(status="Cancelled")),
+    )
+
     average_rating = get_vendor_review(vendor)
-    
 
     context = {
-        'orders': orders,
-        'order_summary': order_summary,
-        'total_revenue': total_revenue,
-        'average_rating': average_rating,
+        "orders": orders,
+        "order_summary": order_summary,
+        "total_revenue": total_revenue,
+        "average_rating": average_rating,
     }
     return render(request, "accounts/vendorDashboard.html", context)
 
-@login_required(login_url='login')
+
+@login_required(login_url="login")
 @user_passes_test(check_role_vendor)
 def get_vendor_order_summary(request):
-    if request.headers.get("x-requested-with") == 'XMLHttpRequest':
+    if request.headers.get("x-requested-with") == "XMLHttpRequest":
         vendor = get_object_or_404(Vendor, user=request.user)
-        filter_type = request.GET.get('filter_type', None)
+        filter_type = request.GET.get("filter_type", None)
         order_summary = vendor_order_summary(vendor, filter_type=filter_type)
-        return JsonResponse({'status': "Success", 'data': order_summary})
+        return JsonResponse({"status": "Success", "data": order_summary})
     else:
-        return JsonResponse({'status': "Failed", 'message': "Invalid Request"}, status=400)
+        return JsonResponse(
+            {"status": "Failed", "message": "Invalid Request"}, status=400
+        )
 
 
 def get_vendor_order_revenue(request):
     if request.headers.get("x-requested-with") == "XMLHttpRequest":
         vendor = get_object_or_404(Vendor, user=request.user)
-        daily_revenue, monthly_revenue, last_12months, last_30days = vendor_total_revenue(vendor)
-        return JsonResponse({'status': "success", 'daily_revenue': daily_revenue, 'last_30days': last_30days, 'monthly_revenue': monthly_revenue, 'last_12months': last_12months}, status=200)
+        daily_revenue, monthly_revenue, last_12months, last_30days = (
+            vendor_total_revenue(vendor)
+        )
+        return JsonResponse(
+            {
+                "status": "success",
+                "daily_revenue": daily_revenue,
+                "last_30days": last_30days,
+                "monthly_revenue": monthly_revenue,
+                "last_12months": last_12months,
+            },
+            status=200,
+        )
     else:
-        return JsonResponse({'status': "Failed", 'message': "Invalid request"}, status=400)
+        return JsonResponse(
+            {"status": "Failed", "message": "Invalid request"}, status=400
+        )
+
 
 # Create your views here.
 @login_required(login_url="login")
@@ -241,7 +256,9 @@ def vendor_food_details(request, slug):
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def vendor_orders_all(request):
     vendor = get_object_or_404(Vendor, user=request.user)
-    orders = Order.objects.filter(vendor=vendor, is_ordered=True).order_by("-created_at")
+    orders = Order.objects.filter(vendor=vendor, is_ordered=True).order_by(
+        "-created_at"
+    )
     context = {
         "orders": orders,
         "VALID_STATUS_TRANSITIONS": VALID_STATUS_TRANSITIONS,
@@ -272,8 +289,6 @@ def vendor_update_order_status(request):
             )
         else:
             return JsonResponse({"status": "Failed", "message": "Invalid status"})
-
-
 
 
 @login_required(login_url="login")
