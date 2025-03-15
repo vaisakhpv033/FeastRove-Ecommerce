@@ -29,7 +29,7 @@ SECRET_KEY = config("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config("DEBUG", cast=bool)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['172.232.123.136', '127.0.0.1', 'feastrove.website', 'www.feastrove.website']
 
 
 # Application definition
@@ -96,6 +96,7 @@ TEMPLATES = [
 
                 "marketplace.context_processors.get_cart_count",
                 "marketplace.context_processors.get_cart_total",
+                "marketplace.context_processors.get_cart_items",
             ],
         },
     },
@@ -230,12 +231,12 @@ API_KEY = config("API_KEY")
 GOOGLE_API_KEY = config("GOOGLE_API_KEY")
 
 
+if DEBUG is True:
+    # Add the GDAL binaries directory to the system PATH
+    os.environ['PATH'] = os.path.join(BASE_DIR, 'env/Lib/site-packages/osgeo') + ';' + os.environ['PATH']
 
-# Add the GDAL binaries directory to the system PATH
-os.environ['PATH'] = os.path.join(BASE_DIR, 'env/Lib/site-packages/osgeo') + ';' + os.environ['PATH']
+    # Set the path to the GDAL projection data directory
+    os.environ['PROJ_LIB'] = os.path.join(BASE_DIR, 'env/Lib/site-packages/osgeo/data/proj')
 
-# Set the path to the GDAL projection data directory
-os.environ['PROJ_LIB'] = os.path.join(BASE_DIR, 'env/Lib/site-packages/osgeo/data/proj')
-
-# path to GDAL library
-GDAL_LIBRARY_PATH = os.path.join(BASE_DIR, 'env/Lib/site-packages/osgeo/gdal.dll')
+    # path to GDAL library
+    GDAL_LIBRARY_PATH = os.path.join(BASE_DIR, 'env/Lib/site-packages/osgeo/gdal.dll')

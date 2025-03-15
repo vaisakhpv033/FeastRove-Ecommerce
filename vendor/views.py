@@ -263,7 +263,7 @@ def vendor_orders_all(request):
         "orders": orders,
         "VALID_STATUS_TRANSITIONS": VALID_STATUS_TRANSITIONS,
     }
-    return render(request, "vendor/OrdersAll.html", context)
+    return render(request, "vendor/ordersAll.html", context)
 
 
 @login_required(login_url="login")

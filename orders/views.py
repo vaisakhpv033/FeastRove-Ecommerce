@@ -11,6 +11,7 @@ from customers.models import Address
 from feastrove.settings import RZP_KEY_ID, RZP_KEY_SECRET
 from marketplace.context_processors import get_cart_count, get_cart_total
 from marketplace.models import Cart
+from wallets.models import Wallet, WalletTransaction
 
 from .models import Order, OrderedFood, Payment
 from .utils import inr_to_usd, save_order_details, verify_signature
@@ -92,7 +93,7 @@ def place_order(request):
                 "order": order,
                 "address": address,
             }
-        return render(request, "orders/PlaceOrder.html", context)
+        return render(request, "orders/placeOrder.html", context)
 
     messages.error(request, "Something Went Wrong")
     return redirect(request, "checkout")
@@ -130,7 +131,7 @@ def payments(request):
             user=request.user,
             transaction_id=transaction_id,
             payment_method=payment_method,
-            amount=order.total,
+            amount=order.total_amount,
             status=status,
         )
         payment.save()
@@ -148,25 +149,25 @@ def payments(request):
         if order.payment_method == "razorpay":
             del request.session[order_number]
 
-        # Send order confirmation email to the customer
-        email_subject = "Your Order Placed Successfully"
-        email_template = "orders/order_confirmation_email.html"
-        context = {"user": request.user, "order": order}
-        send_notification(
-            email_subject=email_subject, email_template=email_template, context=context
-        )
+        # # Send order confirmation email to the customer
+        # email_subject = "Your Order Placed Successfully"
+        # email_template = "orders/order_confirmation_email.html"
+        # context = {"user": request.user, "order": order}
+        # send_notification(
+        #     email_subject=email_subject, email_template=email_template, context=context
+        # )
 
-        # Send order receive email to the vendor
-        email_subject = "A new order has been got"
-        email_template = "orders/new_order_received_email.html"
-        to_emails = [order.vendor.user.email]
-        context = {"user": request.user, "order": order, "to_emails": to_emails}
-        send_notification(
-            email_subject=email_subject,
-            email_template=email_template,
-            context=context,
-            to_email=to_emails,
-        )
+        # # Send order receive email to the vendor
+        # email_subject = "A new order has been got"
+        # email_template = "orders/new_order_received_email.html"
+        # to_emails = [order.vendor.user.email]
+        # context = {"user": request.user, "order": order, "to_emails": to_emails}
+        # send_notification(
+        #     email_subject=email_subject,
+        #     email_template=email_template,
+        #     context=context,
+        #     to_email=to_emails,
+        # )
         
         response = {
             "message": "Success",
@@ -181,7 +182,7 @@ def payments(request):
 @user_passes_test(check_role_customer)
 @require_POST
 @cache_control(no_store=True, no_cache=True, must_revalidate=True)
-def payment_cod(request):
+def payment_cod_wallet(request):
     if request.headers.get("x-requested-with") == "XMLHttpRequest":
         order_number = request.POST.get("order_number")
         payment_method = request.POST.get("payment_method")
@@ -191,6 +192,23 @@ def payment_cod(request):
 
         if not all([order_number, payment_method, status]):
             return JsonResponse({"error": "Invalid Payment details"}, status=400)
+        
+        if payment_method == 'wallet':
+            wallet = get_object_or_404(Wallet, user=request.user)
+            if order.total_amount > wallet.balance:
+                return JsonResponse({'error': "Not enough Balance. Payment failed"}, status=400)
+            wallet.withdraw(order.total_amount, description=f"Withdrawal for order: {order.order_number}", order=order)
+            wallet_transaction = WalletTransaction.objects.get(wallet=wallet, order=order, transaction_type='WITHDRAW')
+            payment = Payment(
+                user=request.user,
+                transaction_id=wallet_transaction.transaction_no,
+                payment_method=payment_method,
+                amount=order.total_amount,
+                status="COMPLETED",
+            )
+            payment.save()
+            order.payment = payment
+            
 
         # update order status
         order.is_ordered = True
@@ -198,25 +216,25 @@ def payment_cod(request):
         cart_items = Cart.objects.filter(user=request.user)
         cart_items.delete()
 
-        # Send order confirmation email to the customer
-        email_subject = "Your Order Placed Successfully"
-        email_template = "orders/order_confirmation_email.html"
-        context = {"user": request.user, "order": order}
-        send_notification(
-            email_subject=email_subject, email_template=email_template, context=context
-        )
+        # # Send order confirmation email to the customer
+        # email_subject = "Your Order Placed Successfully"
+        # email_template = "orders/order_confirmation_email.html"
+        # context = {"user": request.user, "order": order}
+        # send_notification(
+        #     email_subject=email_subject, email_template=email_template, context=context
+        # )
 
-        # Send order receive email to the vendor
-        email_subject = "A new order has been got"
-        email_template = "orders/new_order_received_email.html"
-        to_emails = [order.vendor.user.email]
-        context = {"user": request.user, "order": order, "to_emails": to_emails}
-        send_notification(
-            email_subject=email_subject,
-            email_template=email_template,
-            context=context,
-            to_email=list(to_emails),
-        )
+        # # Send order receive email to the vendor
+        # email_subject = "A new order has been got"
+        # email_template = "orders/new_order_received_email.html"
+        # to_emails = [order.vendor.user.email]
+        # context = {"user": request.user, "order": order, "to_emails": to_emails}
+        # send_notification(
+        #     email_subject=email_subject,
+        #     email_template=email_template,
+        #     context=context,
+        #     to_email=list(to_emails),
+        # )
        
         response = {
             "message": "Success",
@@ -224,6 +242,7 @@ def payment_cod(request):
         }
         return JsonResponse(response)
     return JsonResponse({"status": "Failed", "message": "Invalid Request"})
+
 
 
 @login_required(login_url="login")
@@ -237,4 +256,4 @@ def order_complete(request):
         "order": order,
         "ordered_food": ordered_food,
     }
-    return render(request, "orders/OrderComplete.html", context)
+    return render(request, "orders/orderComplete.html", context)

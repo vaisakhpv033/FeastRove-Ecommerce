@@ -69,7 +69,9 @@
         </div> {% endcomment %}
         <div class="btn-group gap-2">
             <a href="#"><button type="button" class="btn btn-sm btn-outline-success add_to_cart" data-id="{{ food_item.slug }}" data-url="{% url 'addToCart' food_item.slug %}">Add To Cart</button></a>
+            {% if request.user.is_authenticated %}
             <a href="#"><button type="button" class="btn btn-sm btn-outline-success add_to_favourites" data-id="{{ food_item.slug }}" data-url="{% url 'customerAddFavourite' food_item.slug %}">Add To Favourites</button></a>
+            {% endif %}
         </div>
 
     </div>

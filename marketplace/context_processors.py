@@ -37,3 +37,12 @@ def get_cart_total(request):
 
     return {"subtotal": subtotal, "tax": tax, "grand_total": grand_total}
 
+
+
+def get_cart_items(request):
+    item_dict = {}
+    if request.user.is_authenticated and request.user.role == 2:
+        cart_items = Cart.objects.filter(user=request.user).select_related("fooditem")
+        item_dict = {i.fooditem.slug: True  for i in cart_items}
+        return {"item_dict":item_dict}
+    return item_dict

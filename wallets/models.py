@@ -40,7 +40,7 @@ class Wallet(models.Model):
         if amount > 0 and self.balance >= amount:
             self.balance -= amount
             self.save()
-            self.add_tranasaction(
+            self.add_transaction(
                 "WITHDRAW", amount=amount, description=description, order=order
             )
             return True

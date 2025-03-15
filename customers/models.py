@@ -36,6 +36,25 @@ class Address(models.Model):
 
     def __str__(self):
         return f"{self.full_name} - {self.city}"
+    
+    def save(self, *args, **kwargs):
+        if self.is_default:
+            Address.objects.filter(user=self.user, is_default=True).update(is_default=False)
+        else:
+            if not Address.objects.filter(user=self.user, is_default=True).exists():
+                self.is_default = True
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        user = self.user
+        is_default_deleted = self.is_default
+        super().delete(*args, **kwargs)
+
+        if is_default_deleted:
+            other_address = Address.objects.filter(user=user).first()
+            if other_address:
+                other_address.is_default = True
+                other_address.save()
 
     class Meta:
         ordering = ["-created_at"]

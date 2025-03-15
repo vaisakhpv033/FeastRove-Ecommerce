@@ -136,6 +136,11 @@
                         <div id="cod-place-order-button">
                             <button class="btn btn-success" id="cod-button">Place order</button>
                         </div>
+                        
+                        {% elif order.payment_method == 'wallet' %}
+                        <div id="wallet-place-order-button">
+                            <button class="btn btn-success" id="wallet-button">Place order</button>
+                        <div>
                         {% endif %}
 
                     </div>
@@ -149,7 +154,7 @@
 
 {% block extra_js %}
 
-{% if not order.payment_method == 'cod' %}
+{% if order.payment_method == 'paypal' or order.payment_method == 'razorpay' %}
 <script>
 
     // using jQuery
@@ -306,7 +311,7 @@
 {% endif %}
 
 
-{% if order.payment_method == 'cod' %}
+{% if order.payment_method == 'cod' or order.payment_method == 'wallet' %}
 <script>
 
      // using jQuery
@@ -332,9 +337,11 @@
     var csrftoken = getCookie('csrftoken');
     var order_complete = "{% url 'orderComplete' %}";
     var url = "{% url 'paymentsCod' %}";
+    let buttonId = {% if order.payment_method == 'cod' %}'#cod-button'; {% else %} '#wallet-button';{% endif %}
+    let paymentMethod = {% if order.payment_method == 'cod' %}'cod'; {% else %} 'wallet';{% endif %}
 
     jQuery(document).ready(function(){
-        $('#cod-button').on('click', function(e){
+        $(buttonId).on('click', function(e){
             e.preventDefault();
             $('#spinner-overlay').removeClass('d-none');
             $('#content-wrapper').addClass('blur-background');
@@ -344,7 +351,7 @@
                 url: url,
                 data: {
                     'order_number': order_number,
-                    'payment_method': "cod",
+                    'payment_method': paymentMethod,
                     'status': "Success",
                     'csrfmiddlewaretoken': csrftoken
                 },

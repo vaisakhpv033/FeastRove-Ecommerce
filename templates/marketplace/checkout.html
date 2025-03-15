@@ -90,41 +90,64 @@
                             </li>
                             <hr class="mt-0">
                             <strong>Choose Payment Method</strong>
-                            <li class="list-group-item d-flex flex-md-column flex-lg-row justify-content-start align-items-center gap-3 ps-0">
+                            <li class="list-group-item d-flex flex-md-column flex-lg-row justify-content-start align-items-center gap-3 ps-0 border-0">
                                 <div class="form-check payment-option">
                                     <input class="form-check-input" type="radio" name="payment-method" id="paypal" value="paypal" hidden>
                                     <label class="form-check-label w-100" for="paypal">
-                                        <img src="{% static 'images/payment-logo/PayPal.png/' %}" height="20">
+                                        <img src="{% static 'images/payment-logo/PayPal.png' %}" height="20">
                                     </label>
                                 </div>
 
                                 <div class="form-check payment-option">
                                     <input class="form-check-input" type="radio" name="payment-method" id="razorpay" value="razorpay" hidden>
                                     <label class="form-check-label w-100" for="razorpay">
-                                        <img src="{% static 'images/payment-logo/razorpay_logo.png/' %}" height="20">
+                                        <img src="{% static 'images/payment-logo/razorpay_logo.png' %}" height="20">
                                     </label>
                                 </div>
 
+<<<<<<< HEAD
+                                <!-- COD Payment Option -->
+=======
+>>>>>>> bd164c1c703d62d2de6c6547d09a56b506724d37
                                 {% if grand_total <= 1000.0 %}
                                 <div class="form-check payment-option">
                                     <input class="form-check-input" type="radio" name="payment-method" id="cod" value="cod" hidden>
-                                    <label class="form-check-label" for="cod">
-                                        <p class="m-0">Cash on Delivery</p>
+                                    <label class="form-check-label" for="cod" style="color: #0e9cd9;"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cash" viewBox="0 0 16 16">
+                                        <path d="M8 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4"/>
+                                        <path d="M0 4a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H1a1 1 0 0 1-1-1zm3 0a2 2 0 0 1-2 2v4a2 2 0 0 1 2 2h10a2 2 0 0 1 2-2V6a2 2 0 0 1-2-2z"/>
+                                      </svg>
+                                        <strong class="m-0" style="color: #1c4e8f;">Cash on Delivery</strong>
                                     </label>
                                 </div>
                                 {% endif %}
+
+
+                        
+
                             </li>
                             
+                            {% if grand_total <= wallet_balance %}
+                            <!-- Wallet Payment Option -->
+                            <div class="form-check payment-option">
+                                <input class="form-check-input" type="radio" name="payment-method" id="wallet" value="wallet" onchange="toggleWalletDetails()" hidden>
+                                <label class="form-check-label w-100" for="wallet">
+                                    <strong>Pay with Wallet</strong>
+                                    <small class="text-muted d-block">Balance: ₹<span id="walletBalance">{{ wallet_balance }}</span></small>
+                                </label>
+                            </div>
+                            {% endif %}
 
+                           
                         </ul>
                         
                         
-
+                        <hr class="mt-1">
                         <button type="submit" onclick="return payMethodConfirm()" data-mdb-button-init data-mdb-ripple-init
                             class="btn btn-success btn-lg btn-block">
                             Proceed to checkout
                         </button>
                     </form>
+                    
                     </div>
                 </div>
             </div>
@@ -209,6 +232,11 @@ function applyCoupon(){
        
     }
 }
+
+
+
+
+
 
 
 

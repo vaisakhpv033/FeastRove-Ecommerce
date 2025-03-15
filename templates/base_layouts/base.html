@@ -6,6 +6,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FeastRove</title>
+
+     <!-- Preconnect to important third-party resources -->
+     <link rel="preconnect" href="https://cdn.jsdelivr.net">
+     <link rel="preconnect" href="https://code.jquery.com">
+
+
     {% block extra_head %}
     {% endblock %}
     <link rel="icon" type="image/svg+xml" href="{% static 'images/svg-icons/favicon.svg' %}">
@@ -51,9 +57,9 @@
                    
                     {% else %}
                     <li class="list-unstyled nav-item">
-                        <div class="input-group">
-                            <input type="text" class="form-control" placeholder="Detect your location">
-                            <span class="input-group-text"><img
+                        <div class="input-group {% if request.path != '/' %} d-none {% endif %}">
+                            <input type="text" value="" id="user-location" class="form-control" placeholder="Detect your location">
+                            <span onclick="getLocation()" class="input-group-text"><img
                                     src="{% static 'images/svg-icons/detect-location.svg' %}"></span>
                         </div>
                     </li>
@@ -111,64 +117,127 @@
 <script>
 
     jQuery(document).ready(function(){
-        jQuery('.add_to_cart').on('click', function(e){
+
+        // use event delegation to handle dynamic elements
+        jQuery(document).on('click', '.add_to_cart, .go_to_cart', function(e){
             e.preventDefault();
-            
-            food_id = $(this).attr('data-id');
-            url = $(this).attr('data-url');
-            data = {
+
+            const self = $(this);
+            const food_id = $(this).attr('data-id');
+            const url = $(this).attr('data-url');
+            const data = {
                 food_slug: food_id,
-            }
-            $.ajax({
-                type:'GET',
-                url: url,
-                data:data,
-                success: function(response){
-                    //console.log(response.cart_counter['cart_count']);
-                    if (response.status == 'login_required'){
-                        
-                        Swal.fire({
-                            title: "Please Login to continue?",
-                            icon: "info",
-                            showCancelButton: true,
-                            confirmButtonColor: "#3085d6",
-                            cancelButtonColor: "#d33",
-                            confirmButtonText: "Login Now!"
-                          }).then((result) => {
-                            if (result.isConfirmed) {
-                              window.location = '/accounts/login';
+            };
+
+            // check if it's an Add to Cart action or Go to Cart action
+            if (self.hasClass('add_to_cart')) {
+
+                $.ajax({
+                    type:'GET',
+                    url: url,
+                    data:data,
+                    success: function(response){
+                        //console.log(response.cart_counter['cart_count']);
+                        if (response.status == 'login_required'){
+                            
+                            Swal.fire({
+                                title: "Please Login to continue?",
+                                icon: "info",
+                                showCancelButton: true,
+                                confirmButtonColor: "#3085d6",
+                                cancelButtonColor: "#d33",
+                                confirmButtonText: "Login Now!"
+                              }).then((result) => {
+                                if (result.isConfirmed) {
+                                  window.location = '/accounts/login';
+                                }
+                              });
+    
+                        }else if (response.status == 'Success'){
+                            $('#cart_counter').html(response.cart_counter['cart_count']);
+    
+                            let prev_items = response.prev_items.item_dict;
+                            let current_items = response.current_items.item_dict;
+                            
+                            Swal.fire({
+                                title: response.message,
+                                icon: "success",
+                                showCancelButton: true,
+                                confirmButtonColor: "#3085d6",
+                                cancelButtonColor: "#d33",
+                                confirmButtonText: "Go to Cart"
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    window.location = '/marketplace/cart';
+                                }
+                            })
+                            
+                            // Update the clicked button to "Go to Cart"
+                            self.addClass("btn-success go_to_cart").removeClass("btn-outline-success add_to_cart");
+                            self.empty().append('<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-cart-check" viewBox="0 0 16 16"><path d="M11.354 6.354a.5.5 0 0 0-.708-.708L8 8.293 6.854 7.146a.5.5 0 1 0-.708.708l1.5 1.5a.5.5 0 0 0 .708 0z"/><path d="M.5 1a.5.5 0 0 0 0 1h1.11l.401 1.607 1.498 7.985A.5.5 0 0 0 4 12h1a2 2 0 1 0 0 4 2 2 0 0 0 0-4h7a2 2 0 1 0 0 4 2 2 0 0 0 0-4h1a.5.5 0 0 0 .491-.408l1.5-8A.5.5 0 0 0 14.5 3H2.89l-.405-1.621A.5.5 0 0 0 2 1zm3.915 10L3.102 4h10.796l-1.313 7zM6 14a1 1 0 1 1-2 0 1 1 0 0 1 2 0m7 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0"/></svg>');
+                            
+                            // update buttons for other items removed from the cart (if the restaurant is differnt)
+                            for (let x in prev_items) {
+                                if (!(x in current_items)) {
+                                    $('#cart-'+x).addClass("btn-outline-success add_to_cart").removeClass("go_to_cart btn-success");
+                                    $('#cart-'+x).empty().append('<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-cart-plus" viewBox="0 0 16 16"><path d="M9 5.5a.5.5 0 0 0-1 0V7H6.5a.5.5 0 0 0 0 1H8v1.5a.5.5 0 0 0 1 0V8h1.5a.5.5 0 0 0 0-1H9z"/><path d="M.5 1a.5.5 0 0 0 0 1h1.11l.401 1.607 1.498 7.985A.5.5 0 0 0 4 12h1a2 2 0 1 0 0 4 2 2 0 0 0 0-4h7a2 2 0 1 0 0 4 2 2 0 0 0 0-4h1a.5.5 0 0 0 .491-.408l1.5-8A.5.5 0 0 0 14.5 3H2.89l-.405-1.621A.5.5 0 0 0 2 1zm3.915 10L3.102 4h10.796l-1.313 7zM6 14a1 1 0 1 1-2 0 1 1 0 0 1 2 0m7 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0"/></svg>');
+                                }
                             }
-                          });
-
-                    }else if (response.status == 'Success'){
-                        $('#cart_counter').html(response.cart_counter['cart_count']);
-
-                     
-                        Swal.fire({
-                            title: response.message,
-                            icon: "success",
-                            showCancelButton: true,
-                            confirmButtonColor: "#3085d6",
-                            cancelButtonColor: "#d33",
-                            confirmButtonText: "Go to Cart"
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                window.location = '/marketplace/cart';
-                            }
-                        })
-
-                    }else{
-                        Swal.fire({
-                            title: response.message,
-                            icon: "error",
-                        })
+    
+                        }else{
+                            Swal.fire({
+                                title: response.message,
+                                icon: "error",
+                            })
+                        }
                     }
-                }
-            })
-        })
+                });
+
+            } else if (self.hasClass('go_to_cart')){
+                // Redirect to the cart if the button is go to cart
+                window.location = '/marketplace/cart';
+            }
+      
+        });
+
+        
     });
 
 </script>
+
+<script>
+    var x = document.getElementById("user-location");
+    var currentLocation = sessionStorage.getItem("currentlocation");
+    if (currentLocation != "") {
+        x.value = currentLocation;
+    }
+    function getLocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(showPosition);
+      } else { 
+        x.innerHTML = "Geolocation is not supported by this browser.";
+      }
+    }
+    
+    function showPosition(position) {
+        let lat = position.coords.latitude;
+        let lng = position.coords.longitude;
+
+        // send ajax request to the google maps api endpoint and get the location data using lat and long
+        const google_api_key = "{{ google_api_key }}"
+        let url = "https://maps.googleapis.com/maps/api/geocode/json?latlng="+lat+","+lng+"+&key="+google_api_key
+        $.ajax({
+            type: "GET",
+            url: url,
+            success: function (response){
+                let userAddress = response.results[0].formatted_address;
+                x.value = userAddress;
+                sessionStorage.setItem("currentlocation", userAddress);
+            }
+        })
+    }
+    </script>
+
 
 </body>
 

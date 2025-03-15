@@ -5,15 +5,16 @@ from django.contrib.gis.geos import GEOSGeometry
 from django.contrib.gis.measure import D  # 'D' is Shortcut for Distance
 from django.db.models import F, Q
 from django.http import JsonResponse
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect, render, get_object_or_404
 from django.views.decorators.cache import cache_control
 
 from accounts.utils import check_role_customer
 from customers.models import Address
 from menu.models import Category, FoodItem
 from vendor.models import Vendor
+from wallets.models import Wallet
 
-from .context_processors import get_cart_count, get_cart_total
+from .context_processors import get_cart_count, get_cart_total, get_cart_items
 from .models import Cart
 
 # Create your views here.
@@ -89,7 +90,7 @@ def add_to_cart(request, slug):
             try:
                 fooditem = FoodItem.objects.get(slug=slug, is_available=True)
                 vendor = fooditem.vendor
-
+                prev_items = get_cart_items(request)
                 cart_items = Cart.objects.filter(user=request.user)
                 if cart_items.exists():
                     # get the vendor of the items in the current cart
@@ -127,6 +128,8 @@ def add_to_cart(request, slug):
                         "item_qty": cart_item.quantity,
                         "cart_amounts": get_cart_total(request),
                         "total_price": cart_item.total_price,
+                        "prev_items": prev_items,
+                        "current_items": get_cart_items(request),
                     }
                 )
 
@@ -239,8 +242,10 @@ def checkout(request):
     if cart_count <= 0:
         messages.error(request, "Cart is Empty")
         return redirect("cart")
+    wallet_balance = get_object_or_404(Wallet, user=request.user).balance
     context = {
         "addresses": addresses,
+        "wallet_balance": wallet_balance,
     }
     return render(request, "marketplace/checkout.html", context)
 

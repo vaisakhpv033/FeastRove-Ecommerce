@@ -89,7 +89,7 @@ class Order(models.Model):
         """refund the amount to the wallet of the user if order status is cancelled and the payment method is not COD"""
         if self.pk is not None:
             current = Order.objects.get(pk=self.pk)
-            if current.status != self.status and self.status == 'Cancelled' and self.payment_method in ['razorpay', 'paypal']:
+            if current.status != self.status and self.status == 'Cancelled' and self.payment_method in ['razorpay', 'paypal', 'wallet']:
                 super().save(*args, **kwargs)
                 from wallets.models import Wallet # to avoid circular import 
                 user_wallet = Wallet.objects.get(user=self.user)
